@@ -1,0 +1,27 @@
+model: yolo26n.pt
+dataset: data/processed/neu_det/dataset.yaml
+project: artifacts/runs
+name: smoke
+epochs: 2
+patience: 2
+image_size: 320
+batch: 2
+workers: 0
+device: cpu
+seed: 42
+deterministic: true
+pretrained: true
+amp: false
+resume: false
+augmentation:
+  degrees: 0.0
+  translate: 0.0
+  scale: 0.0
+  fliplr: 0.0
+  flipud: 0.0
+  hsv_h: 0.0
+  hsv_s: 0.0
+  hsv_v: 0.0
+  mosaic: 0.0
+  mixup: 0.0
+

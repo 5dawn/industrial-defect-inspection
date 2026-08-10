@@ -1,0 +1,27 @@
+dataset_name: neu_det
+raw_images_dir: data/raw/neu_det/images
+raw_annotations_dir: data/raw/neu_det/annotations_xml
+output_dir: data/processed/neu_det
+report_dir: reports/figures/generated/data
+class_names:
+  - crazing
+  - inclusion
+  - patches
+  - pitted_surface
+  - rolled-in_scale
+  - scratches
+class_aliases:
+  Cr: crazing
+  In: inclusion
+  Pa: patches
+  PS: pitted_surface
+  RS: rolled-in_scale
+  Sc: scratches
+stratify_by: filename_prefix
+split:
+  train: 0.70
+  val: 0.15
+  test: 0.15
+seed: 42
+preview_count: 30
+strict_image_size: true

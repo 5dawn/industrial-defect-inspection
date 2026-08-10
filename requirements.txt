@@ -1,0 +1,2 @@
+# pyproject.toml is the single source of truth for runtime and development dependencies.
+-e .[dev]

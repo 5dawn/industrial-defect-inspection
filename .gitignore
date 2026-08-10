@@ -1,0 +1,33 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+.env
+.idea/
+.vscode/
+Ultralytics/
+
+# Datasets and generated artifacts
+data/raw/**
+!data/raw/.gitkeep
+data/processed/**
+!data/processed/.gitkeep
+artifacts/**
+!artifacts/.gitkeep
+runs/
+reports/metrics/*.json
+reports/figures/generated/
+
+# Model files are published through GitHub Releases
+*.pt
+*.pth
+*.onnx
+*.engine
+
+# Notebook outputs
+.ipynb_checkpoints/

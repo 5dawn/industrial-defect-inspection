@@ -1,0 +1,27 @@
+model: yolo26n.pt
+dataset: data/processed/neu_det/dataset.yaml
+project: artifacts/runs
+name: neu-det-yolo26n-v1
+epochs: 100
+patience: 20
+image_size: 640
+batch: 0.60
+workers: 4
+device: auto
+seed: 42
+deterministic: true
+pretrained: true
+amp: true
+resume: false
+augmentation:
+  degrees: 0.0
+  translate: 0.08
+  scale: 0.20
+  fliplr: 0.5
+  flipud: 0.5
+  hsv_h: 0.0
+  hsv_s: 0.0
+  hsv_v: 0.15
+  mosaic: 0.25
+  mixup: 0.0
+

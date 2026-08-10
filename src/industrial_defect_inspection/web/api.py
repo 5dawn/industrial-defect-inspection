@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-from io import BytesIO
 from typing import Protocol
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import RedirectResponse
-from PIL import Image, ImageOps, UnidentifiedImageError
+from PIL import Image
 
 from industrial_defect_inspection.config import InferenceConfig
 from industrial_defect_inspection.inference.schemas import (
@@ -15,9 +14,13 @@ from industrial_defect_inspection.inference.schemas import (
     InferenceResult,
     ModelMetadata,
 )
+from industrial_defect_inspection.web.uploads import (
+    MAX_UPLOAD_BYTES,
+    UploadTooLargeError,
+    UploadValidationError,
+    decode_upload,
+)
 
-MAX_UPLOAD_BYTES = 10 * 1024 * 1024
-MAX_IMAGE_SIDE = 4096
 ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/webp"}
 
 
@@ -33,21 +36,6 @@ class EngineProtocol(Protocol):
     ) -> tuple[InferenceResult, Image.Image]: ...
 
 
-def decode_upload(payload: bytes) -> tuple[Image.Image, tuple[int, int], bool]:
-    try:
-        with Image.open(BytesIO(payload)) as probe:
-            probe.verify()
-        with Image.open(BytesIO(payload)) as opened:
-            image = ImageOps.exif_transpose(opened).convert("RGB")
-    except (UnidentifiedImageError, OSError, ValueError) as exc:
-        raise ValueError("The upload is not a valid JPEG, PNG, or WebP image") from exc
-    original_size = image.size
-    resized = max(image.size) > MAX_IMAGE_SIDE
-    if resized:
-        image.thumbnail((MAX_IMAGE_SIDE, MAX_IMAGE_SIDE), Image.Resampling.LANCZOS)
-    return image, original_size, resized
-
-
 def create_app(engine: EngineProtocol) -> FastAPI:
     app = FastAPI(
         title="Industrial Defect Inspection API",
@@ -61,8 +49,9 @@ def create_app(engine: EngineProtocol) -> FastAPI:
 
     @app.get("/health", response_model=HealthResponse)
     def health() -> HealthResponse:
+        model_available = engine.loaded or engine.config.model.is_file()
         return HealthResponse(
-            status="ok",
+            status="ok" if model_available else "degraded",
             model_loaded=engine.loaded,
             model_version=engine.config.model_version,
             device=str(engine.device),
@@ -83,15 +72,25 @@ def create_app(engine: EngineProtocol) -> FastAPI:
         if file.content_type not in ALLOWED_CONTENT_TYPES:
             raise HTTPException(status_code=415, detail="Only JPEG, PNG, and WebP are supported")
         payload = await file.read(MAX_UPLOAD_BYTES + 1)
-        if len(payload) > MAX_UPLOAD_BYTES:
-            raise HTTPException(status_code=413, detail="Upload exceeds the 10 MB limit")
         try:
             image, original_size, resized = decode_upload(payload)
             result, _ = engine.predict(image)
-        except ValueError as exc:
+        except UploadTooLargeError as exc:
+            raise HTTPException(status_code=413, detail=str(exc)) from exc
+        except UploadValidationError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
         except FileNotFoundError as exc:
-            raise HTTPException(status_code=503, detail=str(exc)) from exc
+            raise HTTPException(
+                status_code=503,
+                detail=(
+                    f"Model is unavailable at {engine.config.model}. "
+                    "Provide trained weights with --model PATH."
+                ),
+            ) from exc
+        except RuntimeError as exc:
+            raise HTTPException(
+                status_code=503, detail=f"Model inference is unavailable: {exc}"
+            ) from exc
         return result.model_copy(
             update={
                 "original_image_width": original_size[0],

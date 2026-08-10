@@ -160,14 +160,26 @@ in the model card.
 
 ## Web demo and API
 
-Update `configs/infer/default.yaml` to point at a trained checkpoint, then run:
+The Gradio demo and FastAPI service use the same `InferenceEngine` as the CLI.
+Point the inference configuration at a trained checkpoint or override it at startup. For an
+explicit CPU launch using the local smoke checkpoint:
 
 ```powershell
-idi-web --config configs/infer/default.yaml
+idi-web --config configs/infer/default.yaml `
+  --model artifacts/runs/smoke/weights/best.pt `
+  --device cpu
 ```
 
 Open <http://127.0.0.1:7860/demo/>. API documentation is available at
-<http://127.0.0.1:7860/docs>.
+<http://127.0.0.1:7860/docs>. Upload one JPEG, PNG, or WebP image, adjust the confidence
+threshold, and select **Run inspection**. The page displays the annotated image, defect class,
+confidence, bounding-box coordinates, preprocessing/inference/postprocessing time, device, and
+model version. Annotated images and structured JSON are saved under the configured `output_dir`.
+
+The smoke checkpoint only verifies the workflow and must not be presented as a formal result. Use
+a frozen production candidate for portfolio metrics. If the configured model is missing, the
+server still starts in degraded mode: the page shows the expected path and `--model` guidance,
+`GET /health` reports `degraded`, and prediction requests return a clear unavailable response.
 
 | Endpoint | Purpose |
 |---|---|
@@ -176,7 +188,8 @@ Open <http://127.0.0.1:7860/demo/>. API documentation is available at
 | `POST /predict` | JPEG/PNG/WebP multipart upload; returns structured detections |
 
 Uploads are limited to 10 MB. Images larger than 4096 pixels on either side are
-resized while their original dimensions are retained in the response.
+resized while their original dimensions are retained in the response. Empty, corrupt, disguised,
+or unsupported files are rejected before model inference.
 
 ## Repository layout
 

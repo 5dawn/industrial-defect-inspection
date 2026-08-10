@@ -119,6 +119,27 @@ idi-predict --config configs/infer/default.yaml `
 结果默认写入 `artifacts/predictions/`，包含标注 JPEG 和结构化 JSON。模型文件或输入
 图片不存在时，命令会在耗时推理开始前返回明确错误。
 
+## Web Demo
+
+Web 页面与命令行共用同一个 `InferenceEngine`。使用本地 smoke checkpoint 明确启动
+CPU 推理的命令为：
+
+```powershell
+idi-web --config configs/infer/default.yaml `
+  --model artifacts/runs/smoke/weights/best.pt `
+  --device cpu
+```
+
+打开 <http://127.0.0.1:7860/demo/>，上传一张 JPEG、PNG 或 WebP 图片，调整置信度后点击
+**Run inspection**。页面会显示标注图、缺陷类别、置信度、检测框坐标、预处理/推理/
+后处理耗时、设备和模型版本，并允许下载标注图片及 JSON。输出目录由
+`configs/infer/default.yaml` 中的 `output_dir` 管理。
+
+Smoke 权重仅用于验证流程，不代表正式模型成绩。模型文件不存在时服务仍会以降级模式
+启动，页面显示期望路径和 `--model` 修复命令；`GET /health` 返回 `degraded`，推理请求
+返回友好提示。上传限制为 10 MB，损坏文件、伪造图片和不支持的格式会在模型推理前被
+拒绝。
+
 ## 检查
 
 ```powershell

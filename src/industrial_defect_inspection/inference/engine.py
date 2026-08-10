@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import threading
 from pathlib import Path
 from typing import Any
@@ -33,6 +34,9 @@ class InferenceEngine:
                 return
             if not self.config.model.is_file():
                 raise FileNotFoundError(f"Model file not found: {self.config.model}")
+            settings_dir = (self.config.output_dir.parent / "ultralytics").resolve()
+            settings_dir.mkdir(parents=True, exist_ok=True)
+            os.environ.setdefault("YOLO_CONFIG_DIR", str(settings_dir))
             try:
                 from ultralytics import YOLO
             except ImportError as exc:

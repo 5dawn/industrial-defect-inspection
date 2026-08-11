@@ -22,7 +22,7 @@ jobs:
           cache: pip
       - name: Install lightweight test dependencies
         run: |
-          python -m pip install pydantic PyYAML pillow numpy fastapi python-multipart httpx pytest ruff
+          python -m pip install pydantic PyYAML pillow numpy matplotlib psutil fastapi python-multipart httpx pytest ruff
           python -m pip install -e . --no-deps
       - name: Lint
         run: |

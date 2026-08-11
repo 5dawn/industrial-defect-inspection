@@ -8,6 +8,7 @@ import os
 import platform
 import subprocess
 import sys
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -41,6 +42,32 @@ def git_commit() -> str | None:
     return result.stdout.strip() or None
 
 
+def git_state() -> dict[str, Any]:
+    """Return commit and dirty-state provenance without storing the diff itself."""
+    commit = git_commit()
+    try:
+        status = subprocess.run(
+            ["git", "status", "--porcelain"],
+            capture_output=True,
+            check=True,
+            text=True,
+            timeout=5,
+        ).stdout
+        diff = subprocess.run(
+            ["git", "diff", "--binary", "HEAD"],
+            capture_output=True,
+            check=True,
+            timeout=10,
+        ).stdout
+    except (FileNotFoundError, subprocess.SubprocessError):
+        return {"commit": commit, "dirty": None, "diff_sha256": None}
+    return {
+        "commit": commit,
+        "dirty": bool(status.strip()),
+        "diff_sha256": hashlib.sha256(diff).hexdigest() if diff else None,
+    }
+
+
 def environment_snapshot() -> dict[str, Any]:
     snapshot: dict[str, Any] = {
         "python": sys.version,
@@ -48,6 +75,8 @@ def environment_snapshot() -> dict[str, Any]:
         "executable": sys.executable,
         "git_commit": git_commit(),
         "pid": os.getpid(),
+        "captured_at": datetime.now(UTC).isoformat(),
+        "git": git_state(),
     }
     try:
         import torch
@@ -66,3 +95,13 @@ def environment_snapshot() -> dict[str, Any]:
     except ImportError:
         snapshot["ultralytics"] = None
     return snapshot
+
+
+def file_record(path: Path) -> dict[str, Any]:
+    """Return a portable fingerprint for an experiment input."""
+    resolved = path.resolve()
+    return {
+        "path": str(resolved),
+        "bytes": resolved.stat().st_size,
+        "sha256": sha256_file(resolved),
+    }

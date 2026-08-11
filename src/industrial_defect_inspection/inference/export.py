@@ -6,7 +6,7 @@ import argparse
 import shutil
 from pathlib import Path
 
-from industrial_defect_inspection.training.train import resolve_device
+from industrial_defect_inspection.utils.runtime import prepare_runtime, resolve_device
 
 
 def export_onnx(
@@ -18,6 +18,7 @@ def export_onnx(
 ) -> Path:
     if not model_path.is_file():
         raise FileNotFoundError(f"Checkpoint not found: {model_path}")
+    prepare_runtime(output.parent if output else model_path.parent)
     try:
         from ultralytics import YOLO
     except ImportError as exc:

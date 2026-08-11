@@ -36,7 +36,15 @@ format. Seed 42 produces a label-stratified 70/15/15 split. Augmentation is
 applied by the trainer only to the training split.
 
 The generated `metadata.json` is the source of truth for actual sample and box
-counts. Do not copy expected counts into result tables without checking it.
+counts. The 2026-08-11 preparation run found 1,800 images and 4,186 boxes, split
+into 1,260/270/270 images and 2,906/628/652 boxes for train/validation/test.
+Three duplicate XML boxes were removed by the deterministic annotation audit.
+
+One byte-identical image pair, `patches_101` and `patches_105`, has different
+annotations. The pair is retained in the same split to prevent content leakage,
+and the pipeline emits an explicit warning. The source labels are not silently
+rewritten. Aggregate-only statistics and plots are published under
+`reports/metrics/published/data` and `reports/figures/published/data`.
 
 ## Licensing and distribution
 
@@ -58,4 +66,3 @@ distribution. This dataset card is not legal advice.
 - Grayscale data differs from the RGB data used for common pretrained weights.
 - Absence of representative normal images limits false-alarm evaluation.
 - Bounding-box quality must be audited after download; it is not assumed perfect.
-

@@ -19,7 +19,8 @@ def write_evaluation_config(path: Path, extra: str = "") -> None:
                 "dataset: data/processed/dataset.yaml",
                 "output_dir: reports/metrics/validation",
                 "split: val",
-                "confidence: 0.25",
+                "metric_confidence: 0.001",
+                "operating_confidence: 0.25",
                 extra,
             ]
         ),
@@ -44,7 +45,7 @@ def test_load_evaluation_config(tmp_path: Path) -> None:
     [
         ("unexpected: true", "Extra inputs are not permitted"),
         ("split: train", "Input should be 'val' or 'test'"),
-        ("confidence: 1.1", "less than or equal to 1"),
+        ("operating_confidence: 1.1", "less than or equal to 1"),
     ],
 )
 def test_evaluation_config_rejects_invalid_values(tmp_path: Path, extra: str, message: str) -> None:
@@ -84,6 +85,27 @@ def test_evaluation_config_rejects_invalid_cli_override() -> None:
         apply_cli_overrides(config, args)
 
 
+def test_test_config_requires_frozen_threshold() -> None:
+    with pytest.raises(ValidationError, match="frozen operating_confidence"):
+        EvaluationConfig(
+            model=Path("artifacts/model.pt"),
+            dataset=Path("data/dataset.yaml"),
+            output_dir=Path("reports/metrics"),
+            split="test",
+        )
+
+
+def test_metric_confidence_must_be_below_operating_confidence() -> None:
+    with pytest.raises(ValidationError, match="below operating_confidence"):
+        EvaluationConfig(
+            model=Path("artifacts/model.pt"),
+            dataset=Path("data/dataset.yaml"),
+            output_dir=Path("reports/metrics"),
+            metric_confidence=0.5,
+            operating_confidence=0.25,
+        )
+
+
 def test_evaluation_cli_overrides_configured_paths() -> None:
     config = EvaluationConfig(
         model=Path("artifacts/model.pt"),
@@ -98,6 +120,8 @@ def test_evaluation_cli_overrides_configured_paths() -> None:
             "reports/override",
             "--split",
             "test",
+            "--confidence",
+            "0.25",
         ]
     )
 
@@ -106,3 +130,4 @@ def test_evaluation_cli_overrides_configured_paths() -> None:
     assert updated.model == Path("artifacts/override.pt")
     assert updated.output_dir == Path("reports/override")
     assert updated.split == "test"
+    assert updated.operating_confidence == 0.25

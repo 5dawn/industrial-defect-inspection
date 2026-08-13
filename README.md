@@ -20,6 +20,11 @@ redistributing NEU-DET pixels. Its boxes, confidence values, and displayed CPU
 timing come from an actual local inference with the formal checkpoint; the
 controlled benchmark results are reported separately below.
 
+The public `v0.1.1` release is source-only: it contains aggregate reports and
+checksums, but no NEU-DET pixels or dataset-derived `.pt`/`.onnx` weights. To run
+the Demo, train the checkpoint locally after reviewing the upstream dataset
+terms.
+
 ## Status and results
 
 The formal run completed on 2026-08-11. The checkpoint was selected on the
@@ -27,6 +32,12 @@ validation split, the operating confidence (`0.43`) was selected by validation
 micro-F1, and the frozen test split was then evaluated once. Precision, Recall,
 and F1 below use IoU 0.5 at that frozen threshold; mAP uses the full PR curve
 collected from confidence `0.001`.
+
+The registered v0.2 ablation did not replace this baseline. The best candidate
+(`weak-640`) reached validation mAP50-95 `0.40286 ± 0.00458` over seeds
+42/43/44, versus v1's `0.42095`; its two weak classes also did not improve.
+Accordingly, no candidate test evaluation or v2 export was run. See the
+[validation-only negative result](reports/metrics/published/experiments/v2/README.md).
 
 | Model | Split | Precision | Recall | F1 | mAP50 | mAP50-95 |
 |---|---|---:|---:|---:|---:|---:|
@@ -68,6 +79,13 @@ and 195 false-negative boxes. `crazing` is the clearest weakness (Recall 0.410,
 AP50-95 0.179), followed by `rolled-in_scale` (Recall 0.534). Raw error-gallery
 images remain local because the upstream dataset does not state a standard
 redistribution license.
+
+The validation-only diagnostic report found 84 localization failures, 31
+background false positives, and 7 duplicate predictions at the selected
+operating point. Recall was lowest in the third ground-truth area quartile
+(0.586), showing that size alone does not explain the weak classes. See the
+[aggregate analysis](reports/metrics/published/analysis/validation/README.md);
+it contains hashes and statistics, not dataset pixels or workstation paths.
 
 ![Normalized confusion matrix](reports/figures/published/experiment/confusion_matrix_normalized.png)
 
@@ -198,6 +216,31 @@ The committed test configuration contains the validation-selected confidence
 plots, a machine-readable FP/FN manifest, up to 20 local error examples, an
 environment manifest, logs, and a 100-image latency/resource benchmark.
 
+Build the aggregate validation-only error analysis without copying source
+images into the report:
+
+```powershell
+idi-analyze-errors `
+  --evaluation artifacts/evaluations/validation/evaluation.json `
+  --errors artifacts/evaluations/validation/error_samples/errors.csv `
+  --dataset data/processed/neu_det/dataset.yaml `
+  --output artifacts/analysis/validation
+```
+
+The report separates duplicate predictions, class confusion, localization
+failures, and background false positives; it also records confidence/matching
+IoU distributions and recall by ground-truth box-area quartile.
+
+### Registered v0.2 ablations
+
+The experiment YAML files under `configs/train/experiments/v2/` encode the
+fixed matrix. All three candidate configurations are screened with seed 42;
+only the top two validation mAP50-95 configurations continue to seeds 43 and
+44. `idi-compare-experiments` refuses a final report unless each candidate has
+all three seeds. Promotion requires either +0.010 overall validation mAP50-95,
+or +0.025 mean AP50-95 on `crazing` and `rolled-in_scale` with no more than a
+0.005 overall drop. Frozen test metrics never participate in selection.
+
 ## Export and infer
 
 ```powershell
@@ -264,8 +307,17 @@ artifacts/      Ignored checkpoints, exports, runs, and demo outputs
 2. Select checkpoint and confidence on validation only.
 3. Run the test evaluation once after choices are frozen.
 4. Generate the public aggregate report with `idi-publish-report`; do not copy raw images.
-5. Publish `.pt`, `.onnx`, metrics, and
-   checksums in a GitHub Release—never the dataset.
+5. While the NEU-DET license remains unclear, publish only aggregate metrics,
+   environment details, and checksums—never dataset pixels or derived weights.
+
+Create the allowlisted, source-only evidence bundle with:
+
+```powershell
+idi-package-release --version v0.1.1 --output artifacts/releases/v0.1.1
+```
+
+The packager rejects model files, images, XML annotations, absolute local
+paths, and any input outside its fixed report allowlist.
 
 ## Data and software licenses
 

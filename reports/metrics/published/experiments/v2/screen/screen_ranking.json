@@ -1,0 +1,51 @@
+{
+  "selection_split": "val",
+  "screen_seed": 42,
+  "weak_classes": [
+    "crazing",
+    "rolled-in_scale"
+  ],
+  "ranking": [
+    {
+      "name": "weak-640",
+      "seed": 42,
+      "map50_95": 0.3964783338301491,
+      "weak_map50_95": 0.18342082285689604,
+      "cpu_p95_ms": null,
+      "model_bytes": 5392517,
+      "evaluation": "artifacts/evaluations/experiments/v2/weak-640-seed42/evaluation.json",
+      "evaluation_sha256": "1282ccc13e76b4a679fb3a1c1c5cf33268599a339c5a62be89aa62666ea70b37",
+      "model_sha256": "b1093d46789e53cfee030ed68eb13f8206f62cee0dae4352c55944fae759f94f",
+      "image_size": 640
+    },
+    {
+      "name": "weak-no-flip-640",
+      "seed": 42,
+      "map50_95": 0.39643862341201597,
+      "weak_map50_95": 0.20310294565676146,
+      "cpu_p95_ms": null,
+      "model_bytes": 5391877,
+      "evaluation": "artifacts/evaluations/experiments/v2/weak-no-flip-640-seed42/evaluation.json",
+      "evaluation_sha256": "6b3811d04f1a374d507f6b27733e41bacdb22011b72881d2ddcd432095cd1dd4",
+      "model_sha256": "21381c9196a0b6d2cd4a84d97f087bd1b51fa907258c59181fd043b56fd2bfce",
+      "image_size": 640
+    },
+    {
+      "name": "efficient-512",
+      "seed": 42,
+      "map50_95": 0.3953525050626658,
+      "weak_map50_95": 0.18003937881219276,
+      "cpu_p95_ms": null,
+      "model_bytes": 5375941,
+      "evaluation": "artifacts/evaluations/experiments/v2/efficient-512-seed42/evaluation.json",
+      "evaluation_sha256": "bfb114df0ccdcb5f00a04419f0f7111df86f5137c27f450900d69bd5be0c1dea",
+      "model_sha256": "e426f3e4bc817393c54463e5a07552b8ff66d2265630b56d33ea468b5fb34327",
+      "image_size": 512
+    }
+  ],
+  "selected_for_confirmation": [
+    "weak-640",
+    "weak-no-flip-640"
+  ],
+  "test_metrics_used_for_selection": false
+}

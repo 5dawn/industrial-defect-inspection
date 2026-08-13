@@ -40,6 +40,23 @@ def test_train_reports_missing_prepared_dataset(tmp_path: Path) -> None:
         train(config)
 
 
+def test_train_refuses_to_overwrite_existing_run(tmp_path: Path) -> None:
+    dataset = tmp_path / "dataset.yaml"
+    dataset.write_text("names: {0: defect}\n", encoding="utf-8")
+    run_dir = tmp_path / "runs" / "registered-run"
+    run_dir.mkdir(parents=True)
+    (run_dir / "user-result.txt").write_text("keep", encoding="utf-8")
+    config = TrainConfig(
+        model="yolo26n.pt",
+        dataset=dataset,
+        project=tmp_path / "runs",
+        name="registered-run",
+    )
+
+    with pytest.raises(FileExistsError, match="not empty"):
+        train(config)
+
+
 def test_evaluate_reports_missing_model_before_loading_backend(tmp_path: Path) -> None:
     missing = tmp_path / "best.pt"
 

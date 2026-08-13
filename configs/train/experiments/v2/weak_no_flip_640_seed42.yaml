@@ -1,0 +1,26 @@
+model: yolo26n.pt
+dataset: data/processed/neu_det/dataset.yaml
+project: artifacts/runs/experiments/v2
+name: weak-no-flip-640-seed42
+epochs: 100
+patience: 20
+image_size: 640
+batch: 0.60
+workers: 4
+device: "0"
+seed: 42
+deterministic: true
+pretrained: true
+amp: true
+resume: false
+augmentation:
+  degrees: 0.0
+  translate: 0.04
+  scale: 0.10
+  fliplr: 0.5
+  flipud: 0.0
+  hsv_h: 0.0
+  hsv_s: 0.0
+  hsv_v: 0.08
+  mosaic: 0.0
+  mixup: 0.0

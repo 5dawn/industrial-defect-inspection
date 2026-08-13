@@ -27,7 +27,7 @@ reports/figures/generated/
 !reports/figures/published/
 !reports/figures/published/**
 
-# Model files are published through GitHub Releases
+# Generated model files stay local unless a future license review permits distribution.
 *.pt
 *.pth
 *.onnx

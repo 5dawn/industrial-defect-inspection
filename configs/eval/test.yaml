@@ -1,10 +1,10 @@
 model: artifacts/runs/neu-det-yolo26n-v1/weights/best.pt
 dataset: data/processed/neu_det/dataset.yaml
-output_dir: artifacts/evaluations/validation
-split: val
-device: auto
+output_dir: artifacts/evaluations/test
+split: test
+device: "0"
 metric_confidence: 0.001
-operating_confidence: null
+operating_confidence: 0.43
 iou_threshold: 0.5
 image_size: 640
 error_samples: 20

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 import threading
 from pathlib import Path
 from typing import Any
@@ -12,7 +11,7 @@ from PIL import Image
 
 from industrial_defect_inspection.config import InferenceConfig
 from industrial_defect_inspection.inference.schemas import Detection, InferenceResult
-from industrial_defect_inspection.training.train import resolve_device
+from industrial_defect_inspection.utils.runtime import prepare_runtime, resolve_device
 
 
 class InferenceEngine:
@@ -34,14 +33,20 @@ class InferenceEngine:
                 return
             if not self.config.model.is_file():
                 raise FileNotFoundError(f"Model file not found: {self.config.model}")
-            settings_dir = (self.config.output_dir.parent / "ultralytics").resolve()
-            settings_dir.mkdir(parents=True, exist_ok=True)
-            os.environ.setdefault("YOLO_CONFIG_DIR", str(settings_dir))
+            prepare_runtime(self.config.output_dir)
             try:
                 from ultralytics import YOLO
             except ImportError as exc:
                 raise RuntimeError("Install the project dependencies before inference") from exc
             self._model = YOLO(str(self.config.model))
+            names = getattr(self._model, "names", None)
+            if self.config.class_names and isinstance(names, dict):
+                model_names = [str(names[index]) for index in sorted(names)]
+                if model_names != self.config.class_names:
+                    raise ValueError(
+                        "Configured class_names do not match model metadata: "
+                        f"configured={self.config.class_names}, model={model_names}"
+                    )
 
     def predict(
         self, image: Image.Image | np.ndarray | str | Path, confidence: float | None = None

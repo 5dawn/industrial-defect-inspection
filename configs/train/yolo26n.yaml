@@ -7,7 +7,7 @@ patience: 20
 image_size: 640
 batch: 0.60
 workers: 4
-device: auto
+device: "0"
 seed: 42
 deterministic: true
 pretrained: true
@@ -24,4 +24,3 @@ augmentation:
   hsv_v: 0.15
   mosaic: 0.25
   mixup: 0.0
-

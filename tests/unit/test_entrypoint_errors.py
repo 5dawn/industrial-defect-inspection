@@ -50,10 +50,13 @@ def test_evaluate_reports_missing_model_before_loading_backend(tmp_path: Path) -
             split="val",
             output_dir=tmp_path / "metrics",
             device="cpu",
-            confidence=0.25,
+            metric_confidence=0.001,
+            operating_confidence=0.25,
+            iou_threshold=0.5,
             image_size=320,
             error_samples=0,
             benchmark_count=1,
+            benchmark_warmup=0,
         )
 
 
@@ -68,10 +71,13 @@ def test_evaluate_reports_missing_dataset_before_loading_backend(tmp_path: Path)
             split="val",
             output_dir=tmp_path / "metrics",
             device="cpu",
-            confidence=0.25,
+            metric_confidence=0.001,
+            operating_confidence=0.25,
+            iou_threshold=0.5,
             image_size=320,
             error_samples=0,
             benchmark_count=1,
+            benchmark_warmup=0,
         )
 
 

@@ -1,0 +1,167 @@
+{
+  "dataset": "neu_det",
+  "created_at": "2026-08-11T05:18:00.345858+00:00",
+  "seed": 42,
+  "class_names": [
+    "crazing",
+    "inclusion",
+    "patches",
+    "pitted_surface",
+    "rolled-in_scale",
+    "scratches"
+  ],
+  "source_statistics": {
+    "images": 1800,
+    "boxes": 4186,
+    "images_per_class": {
+      "crazing": 300,
+      "inclusion": 382,
+      "patches": 342,
+      "pitted_surface": 301,
+      "rolled-in_scale": 300,
+      "scratches": 300
+    },
+    "boxes_per_class": {
+      "crazing": 688,
+      "inclusion": 1010,
+      "patches": 880,
+      "pitted_surface": 432,
+      "rolled-in_scale": 628,
+      "scratches": 548
+    },
+    "normalized_box_width": {
+      "min": 0.04,
+      "median": 0.275,
+      "max": 0.995
+    },
+    "normalized_box_height": {
+      "min": 0.045,
+      "median": 0.385,
+      "max": 0.995
+    },
+    "normalized_box_area": {
+      "min": 0.0026999999999999997,
+      "median": 0.117975,
+      "max": 0.990025
+    }
+  },
+  "splits": {
+    "train": {
+      "images": 1260,
+      "boxes": 2906,
+      "images_per_class": {
+        "crazing": 210,
+        "inclusion": 268,
+        "patches": 240,
+        "pitted_surface": 210,
+        "rolled-in_scale": 210,
+        "scratches": 210
+      },
+      "boxes_per_class": {
+        "crazing": 481,
+        "inclusion": 693,
+        "patches": 616,
+        "pitted_surface": 300,
+        "rolled-in_scale": 428,
+        "scratches": 388
+      },
+      "normalized_box_width": {
+        "min": 0.04,
+        "median": 0.275,
+        "max": 0.995
+      },
+      "normalized_box_height": {
+        "min": 0.045,
+        "median": 0.385,
+        "max": 0.995
+      },
+      "normalized_box_area": {
+        "min": 0.0026999999999999997,
+        "median": 0.115875,
+        "max": 0.990025
+      }
+    },
+    "val": {
+      "images": 270,
+      "boxes": 628,
+      "images_per_class": {
+        "crazing": 45,
+        "inclusion": 59,
+        "patches": 51,
+        "pitted_surface": 45,
+        "rolled-in_scale": 45,
+        "scratches": 45
+      },
+      "boxes_per_class": {
+        "crazing": 107,
+        "inclusion": 154,
+        "patches": 130,
+        "pitted_surface": 64,
+        "rolled-in_scale": 97,
+        "scratches": 76
+      },
+      "normalized_box_width": {
+        "min": 0.045,
+        "median": 0.29,
+        "max": 0.995
+      },
+      "normalized_box_height": {
+        "min": 0.055,
+        "median": 0.385,
+        "max": 0.995
+      },
+      "normalized_box_area": {
+        "min": 0.00605,
+        "median": 0.12625,
+        "max": 0.98505
+      }
+    },
+    "test": {
+      "images": 270,
+      "boxes": 652,
+      "images_per_class": {
+        "crazing": 45,
+        "inclusion": 55,
+        "patches": 51,
+        "pitted_surface": 46,
+        "rolled-in_scale": 45,
+        "scratches": 45
+      },
+      "boxes_per_class": {
+        "crazing": 100,
+        "inclusion": 163,
+        "patches": 134,
+        "pitted_surface": 68,
+        "rolled-in_scale": 103,
+        "scratches": 84
+      },
+      "normalized_box_width": {
+        "min": 0.045,
+        "median": 0.265,
+        "max": 0.995
+      },
+      "normalized_box_height": {
+        "min": 0.055,
+        "median": 0.39,
+        "max": 0.995
+      },
+      "normalized_box_area": {
+        "min": 0.006500000000000001,
+        "median": 0.11624999999999999,
+        "max": 0.9801
+      }
+    }
+  },
+  "duplicate_content_group_count": 1,
+  "annotation_audit": {
+    "duplicate_boxes_removed": 3,
+    "files_with_duplicate_boxes": [
+      "crazing_120.xml",
+      "inclusion_62.xml",
+      "patches_198.xml"
+    ]
+  },
+  "warnings": [
+    "Found 1 duplicate-content group(s) with different annotations; they will remain in the same split: patches_101/patches_105"
+  ]
+}

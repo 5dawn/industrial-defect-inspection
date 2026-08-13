@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import pytest
 from PIL import Image
 
 from industrial_defect_inspection.config import DataConfig
@@ -76,3 +77,10 @@ def test_prepare_refuses_to_overwrite(tmp_path: Path) -> None:
         assert "--overwrite" in str(exc)
     else:
         raise AssertionError("Expected processed data overwrite protection")
+
+
+def test_prepare_can_fail_on_conflicting_duplicate_annotations(tmp_path: Path) -> None:
+    config = make_dataset(tmp_path).model_copy(update={"duplicate_annotation_policy": "error"})
+
+    with pytest.raises(ValueError, match="duplicate-content group"):
+        prepare_dataset(config)

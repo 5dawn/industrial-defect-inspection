@@ -22,6 +22,10 @@ artifacts/**
 runs/
 reports/metrics/*.json
 reports/figures/generated/
+!reports/metrics/published/
+!reports/metrics/published/**
+!reports/figures/published/
+!reports/figures/published/**
 
 # Model files are published through GitHub Releases
 *.pt

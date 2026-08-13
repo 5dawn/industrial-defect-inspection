@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import random
 import shutil
+import warnings
 from collections import Counter, defaultdict
 from collections.abc import Iterable
 from dataclasses import dataclass
@@ -17,6 +18,7 @@ from PIL import Image, ImageDraw, ImageFont
 from industrial_defect_inspection.config import DataConfig, load_data_config
 from industrial_defect_inspection.data.voc import VocAnnotation, parse_voc_annotation
 from industrial_defect_inspection.utils.io import sha256_file, write_json
+from industrial_defect_inspection.utils.runtime import prepare_runtime
 
 IMAGE_SUFFIXES = {".bmp", ".jpeg", ".jpg", ".png", ".tif", ".tiff", ".webp"}
 
@@ -264,8 +266,82 @@ def _dataset_statistics(samples: list[Sample], class_names: list[str]) -> dict[s
     }
 
 
+def _write_aggregate_report(
+    metadata: dict[str, object],
+    samples: list[Sample],
+    report_dir: Path,
+    figure_dir: Path,
+) -> None:
+    """Publish aggregate-only evidence without redistributing dataset pixels."""
+    report_dir.mkdir(parents=True, exist_ok=True)
+    figure_dir.mkdir(parents=True, exist_ok=True)
+    source = metadata["source_statistics"]
+    splits = metadata["splits"]
+    public_report = {
+        "dataset": metadata["dataset"],
+        "created_at": metadata["created_at"],
+        "seed": metadata["seed"],
+        "class_names": metadata["class_names"],
+        "source_statistics": source,
+        "splits": splits,
+        "duplicate_content_group_count": len(metadata["duplicate_content_groups"]),
+        "annotation_audit": metadata["annotation_audit"],
+        "warnings": metadata["warnings"],
+    }
+    write_json(report_dir / "dataset_summary.json", public_report)
+
+    prepare_runtime(figure_dir)
+    import matplotlib.pyplot as plt
+
+    class_names = list(metadata["class_names"])
+    box_counts = [source["boxes_per_class"][name] for name in class_names]
+    figure, axis = plt.subplots(figsize=(9, 4.5))
+    axis.bar(class_names, box_counts, color="#3776ab")
+    axis.set(title="NEU-DET bounding boxes by class", ylabel="boxes")
+    axis.tick_params(axis="x", rotation=25)
+    figure.tight_layout()
+    figure.savefig(figure_dir / "class_distribution.png", dpi=160)
+    plt.close(figure)
+
+    split_names = ["train", "val", "test"]
+    split_counts = [splits[name]["images"] for name in split_names]
+    figure, axis = plt.subplots(figsize=(6, 4))
+    axis.bar(split_names, split_counts, color=["#3776ab", "#f2a900", "#5b8c5a"])
+    axis.set(title="Reproducible dataset split", ylabel="images")
+    figure.tight_layout()
+    figure.savefig(figure_dir / "split_distribution.png", dpi=160)
+    plt.close(figure)
+
+    areas = [
+        (box.width / sample.annotation.width) * (box.height / sample.annotation.height)
+        for sample in samples
+        for box in sample.annotation.boxes
+    ]
+    figure, axis = plt.subplots(figsize=(7, 4))
+    axis.hist(areas, bins=30, color="#3776ab", edgecolor="white")
+    axis.set(title="Normalized bounding-box area", xlabel="box area / image area", ylabel="boxes")
+    figure.tight_layout()
+    figure.savefig(figure_dir / "box_area_distribution.png", dpi=160)
+    plt.close(figure)
+
+
 def prepare_dataset(config: DataConfig, overwrite: bool = False) -> dict[str, object]:
     samples = load_samples(config)
+    duplicate_groups = _duplicate_content_groups(samples)
+    conflicting_duplicates = [
+        group for group in duplicate_groups if not group["annotations_identical"]
+    ]
+    warning_messages: list[str] = []
+    if conflicting_duplicates:
+        message = (
+            f"Found {len(conflicting_duplicates)} duplicate-content group(s) with different "
+            "annotations; they will remain in the same split: "
+            + ", ".join("/".join(group["stems"]) for group in conflicting_duplicates)
+        )
+        if config.duplicate_annotation_policy == "error":
+            raise ValueError(message)
+        warnings.warn(message, UserWarning, stacklevel=2)
+        warning_messages.append(message)
     output = config.output_dir.resolve()
     if output.exists() and any(output.iterdir()):
         if not overwrite:
@@ -330,8 +406,9 @@ def prepare_dataset(config: DataConfig, overwrite: bool = False) -> dict[str, ob
         "seed": config.seed,
         "class_names": config.class_names,
         "source_statistics": _dataset_statistics(samples, config.class_names),
-        "duplicate_content_groups": _duplicate_content_groups(samples),
+        "duplicate_content_groups": duplicate_groups,
         "annotation_audit": _annotation_audit(samples),
+        "warnings": warning_messages,
         "splits": split_stats,
         "files": [
             {
@@ -345,6 +422,12 @@ def prepare_dataset(config: DataConfig, overwrite: bool = False) -> dict[str, ob
     }
     write_json(output / "metadata.json", metadata)
     write_json(config.report_dir / "dataset_report.json", metadata)
+    _write_aggregate_report(
+        metadata,
+        samples,
+        config.aggregate_report_dir or config.report_dir / "aggregate_report",
+        config.aggregate_figure_dir or config.report_dir / "aggregate_figures",
+    )
     return metadata
 
 

@@ -33,6 +33,8 @@ class DataConfig(StrictModel):
     raw_annotations_dir: Path
     output_dir: Path
     report_dir: Path
+    aggregate_report_dir: Path | None = None
+    aggregate_figure_dir: Path | None = None
     class_names: list[str]
     class_aliases: dict[str, str] = Field(default_factory=dict)
     stratify_by: Literal["annotation_set", "filename_prefix"] = "annotation_set"
@@ -40,6 +42,7 @@ class DataConfig(StrictModel):
     seed: int = 42
     preview_count: int = Field(default=30, ge=0)
     strict_image_size: bool = True
+    duplicate_annotation_policy: Literal["warn", "error"] = "warn"
 
 
 class AugmentationConfig(StrictModel):
@@ -80,10 +83,24 @@ class EvaluationConfig(StrictModel):
     output_dir: Path
     split: Literal["val", "test"] = "val"
     device: str = "auto"
-    confidence: float = Field(default=0.25, ge=0.0, le=1.0)
+    metric_confidence: float = Field(default=0.001, gt=0.0, lt=1.0)
+    operating_confidence: float | None = Field(default=None, ge=0.0, le=1.0)
+    iou_threshold: float = Field(default=0.5, gt=0.0, le=1.0)
     image_size: int = Field(default=640, ge=32)
     error_samples: int = Field(default=20, ge=0)
     benchmark_count: int = Field(default=100, ge=1)
+    benchmark_warmup: int = Field(default=10, ge=0)
+
+    @model_validator(mode="after")
+    def require_frozen_test_threshold(self) -> EvaluationConfig:
+        if self.split == "test" and self.operating_confidence is None:
+            raise ValueError("Test evaluation requires a frozen operating_confidence")
+        if (
+            self.operating_confidence is not None
+            and self.metric_confidence >= self.operating_confidence
+        ):
+            raise ValueError("metric_confidence must be below operating_confidence")
+        return self
 
 
 class InferenceConfig(StrictModel):

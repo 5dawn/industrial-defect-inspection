@@ -11,9 +11,25 @@ PyTorch 和 YOLO26n，在 NEU-DET 六类钢材缺陷数据上提供可复现的�
 
 ## 当前状态
 
-工程 MVP 已完成。仓库不会提交数据集、训练权重或本地实验产物；测试集正式指标、
-CPU 延迟和 Release 权重将在完成冻结测试评估后发布。在此之前，英文首页中的指标保持
-`pending`，2 epochs 冒烟训练结果不视为正式模型成绩。
+工程 MVP 与正式本地评估已完成。100 epoch 配置在第 98 epoch 触发 early stopping，
+最佳 checkpoint 来自第 78 epoch。置信度 0.43 只在验证集上选择，随后冻结测试集只评估
+一次。2 epochs 冒烟结果仍不视为正式成绩。
+
+![工业缺陷检测 Demo](../assets/demo/industrial-defect-demo.gif)
+
+动画使用 AI 生成的 synthetic 钢材图片，不重新分发 NEU-DET 原始像素。检测框、
+置信度和页面中的 CPU 耗时均来自正式 checkpoint 的实际本地推理；受控性能基准仍以
+下方 100 张测试图的报告为准。
+
+| Split | Precision | Recall | F1 | mAP50 | mAP50-95 |
+|---|---:|---:|---:|---:|---:|
+| validation | 0.777 | 0.677 | 0.723 | 0.733 | 0.421 |
+| frozen test | 0.775 | 0.701 | 0.736 | 0.776 | 0.441 |
+
+以上 P/R/F1 使用置信度 0.43、IoU 0.5；mAP 使用 0.001 收集完整 PR 曲线。100 张测试图、
+batch=1、10 次预热后的端到端 p50/p95 为：PyTorch CPU 43.38/46.82 ms、ONNX CPU
+22.98/26.19 ms、PyTorch GPU 13.26/15.76 ms。完整真实报告见
+[`reports/metrics/published`](../reports/metrics/published/)。权重和数据集仍不提交 Git。
 
 ## 功能
 
@@ -96,23 +112,27 @@ idi-train --config configs/train/yolo26n.yaml
 
 ## 验证
 
-模型、数据集、输出目录、split 和推理参数由 `configs/eval/default.yaml` 管理。可以修改
-配置，也可以通过命令行临时覆盖模型路径：
+验证配置将 mAP 的低收集阈值与部署工作阈值分开。先只在 val 上选择 F1 阈值：
 
 ```powershell
 idi-evaluate --config configs/eval/default.yaml `
-  --model artifacts/runs/smoke/weights/best.pt `
+  --model artifacts/runs/neu-det-yolo26n-v1/weights/best.pt `
   --split val
 ```
 
-只有在模型、阈值和输入尺寸全部冻结后，才能将 `--split test` 的结果写入模型卡和
-英文首页。
+冻结后的测试配置位于 `configs/eval/test.yaml`：
+
+```powershell
+idi-evaluate --config configs/eval/test.yaml
+```
+
+评估输出总体与逐类 P/R/F1/AP、FP/FN 清单、阈值曲线、日志、环境清单和资源基准。
 
 ## 单图推理
 
 ```powershell
 idi-predict --config configs/infer/default.yaml `
-  --model artifacts/runs/smoke/weights/best.pt `
+  --model artifacts/runs/neu-det-yolo26n-v1/weights/best.pt `
   --source path\to\image.jpg
 ```
 
@@ -121,12 +141,12 @@ idi-predict --config configs/infer/default.yaml `
 
 ## Web Demo
 
-Web 页面与命令行共用同一个 `InferenceEngine`。使用本地 smoke checkpoint 明确启动
+Web 页面与命令行共用同一个 `InferenceEngine`。使用正式本地 checkpoint 启动
 CPU 推理的命令为：
 
 ```powershell
 idi-web --config configs/infer/default.yaml `
-  --model artifacts/runs/smoke/weights/best.pt `
+  --model artifacts/runs/neu-det-yolo26n-v1/weights/best.pt `
   --device cpu
 ```
 
@@ -134,11 +154,12 @@ idi-web --config configs/infer/default.yaml `
 **Run inspection**。页面会显示标注图、缺陷类别、置信度、检测框坐标、预处理/推理/
 后处理耗时、设备和模型版本，并允许下载标注图片及 JSON。输出目录由
 `configs/infer/default.yaml` 中的 `output_dir` 管理。
+仓库提供了许可安全的 [synthetic 样例图](../assets/demo/synthetic_steel_sample.jpg)，
+可用于首次启动验收。
 
-Smoke 权重仅用于验证流程，不代表正式模型成绩。模型文件不存在时服务仍会以降级模式
-启动，页面显示期望路径和 `--model` 修复命令；`GET /health` 返回 `degraded`，推理请求
-返回友好提示。上传限制为 10 MB，损坏文件、伪造图片和不支持的格式会在模型推理前被
-拒绝。
+默认置信度为验证集选择的 0.43。模型文件不存在时服务仍会以降级模式启动，页面显示
+期望路径和 `--model` 修复命令；`GET /health` 返回 `degraded`，推理请求返回友好提示。
+上传限制为 10 MB，损坏文件、伪造图片和不支持的格式会在模型推理前被拒绝。
 
 ## 检查
 

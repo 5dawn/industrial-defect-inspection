@@ -1,7 +1,7 @@
-model: artifacts/models/neu-det-yolo26n-v1/best.pt
+model: artifacts/runs/neu-det-yolo26n-v1/weights/best.pt
 output_dir: artifacts/predictions
 device: auto
-confidence: 0.25
+confidence: 0.43
 image_size: 640
 max_detections: 100
 model_version: neu-det-yolo26n-v1

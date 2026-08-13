@@ -1,6 +1,7 @@
 # Model Card: neu-det-yolo26n-v1
 
-> Status: template. Complete all pending fields before publishing weights.
+> Status: formal local evaluation completed on 2026-08-11. Weights are not yet
+> published in a GitHub Release.
 
 ## Model
 
@@ -15,27 +16,36 @@
 - Dataset: NEU-DET; see `reports/dataset_card.md`
 - Split: label-stratified 70/15/15, seed 42
 - Configuration: `configs/train/yolo26n.yaml`
-- Hardware: pending
-- PyTorch / CUDA / Ultralytics versions: pending
-- Git commit: pending
-- Training duration: pending
+- Hardware: NVIDIA GeForce RTX 5060 Ti 16 GB; Intel Core i5-12600KF
+- PyTorch / CUDA / Ultralytics: 2.12.1+cu130 / CUDA 13.0 / 8.4.117
+- Source state: base commit `69476f7`; the run manifest also records the exact dirty-tree diff hash
+- Training duration: 1,144.62 seconds (about 19.1 minutes)
+- Epochs: 98 completed; early stopping selected epoch 78
+- Batch: Ultralytics AutoBatch selected 22 at 640×640
 
 ## Evaluation
 
-| Metric | Validation | Test |
+| Metric | Validation | Frozen test |
 |---|---:|---:|
-| mAP50 | pending | pending |
-| mAP50-95 | pending | pending |
-| Precision | pending | pending |
-| Recall | pending | pending |
+| mAP50 | 0.733 | 0.776 |
+| mAP50-95 | 0.421 | 0.441 |
+| Precision @ conf 0.43, IoU 0.5 | 0.777 | 0.775 |
+| Recall @ conf 0.43, IoU 0.5 | 0.677 | 0.701 |
+| F1 @ conf 0.43, IoU 0.5 | 0.723 | 0.736 |
 
-- Selected confidence threshold: pending
-- PyTorch CPU p50/p95: pending
-- ONNX CPU p50/p95: pending
-- PT/ONNX comparison on 20 test images: pending
+- Selected confidence threshold: 0.43, selected only on validation micro-F1
+- PyTorch CPU p50/p95: 43.38 / 46.82 ms
+- ONNX Runtime CPU p50/p95: 22.98 / 26.19 ms
+- PyTorch GPU p50/p95: 13.26 / 15.76 ms
+- Benchmark protocol: batch 1, 10 warmups, 100 frozen test images, end-to-end wall time
+- PT/ONNX comparison: 24/24 detections matched on 20 test images; mean box IoU
+  0.999999; maximum confidence delta 0.000015
+- Test operating-point errors: 457 TP, 133 FP, 195 FN
 
-Attach the generated per-class table, confusion matrix, and representative
-false-positive/false-negative samples to the release.
+The full aggregate report, per-class table, threshold sweep, training curves,
+PR curve, and confusion matrix are under `reports/metrics/published` and
+`reports/figures/published`. Raw FP/FN images remain local because NEU-DET does
+not state a standard redistribution license.
 
 ## Intended use and limitations
 
@@ -53,7 +63,6 @@ camera, lighting, material, and preprocessing changes.
 - `model.onnx` (FP32, fixed 640×640 input)
 - `evaluation.json`
 - SHA-256 checksums
-- completed model card
+- completed model card and aggregate evaluation report
 
 The source dataset must not be included in the model release.
-

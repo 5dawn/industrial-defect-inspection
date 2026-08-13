@@ -1,0 +1,140 @@
+{
+  "selection_split": "val",
+  "weak_classes": [
+    "crazing",
+    "rolled-in_scale"
+  ],
+  "standard_deviation": "population (ddof=0)",
+  "baseline": {
+    "name": "baseline-v1",
+    "seed": 42,
+    "map50_95": 0.42094793208522197,
+    "weak_map50_95": 0.18438454628651202,
+    "cpu_p95_ms": 46.81970000092406,
+    "model_bytes": 5397253,
+    "evaluation": "artifacts/evaluations/validation-v011-analysis/evaluation.json",
+    "evaluation_sha256": "00d591b0f6baf67e7626ce14886e5b20e1531d692133a61e91da0967837ad465",
+    "model_sha256": "10cb378849be4a0de5fb333c4169a5a66d2103a6b6891b78183530adff3306b5",
+    "image_size": 640
+  },
+  "observations": [
+    {
+      "name": "weak-640",
+      "seed": 42,
+      "map50_95": 0.3964783338301491,
+      "weak_map50_95": 0.18342082285689604,
+      "cpu_p95_ms": null,
+      "model_bytes": 5392517,
+      "evaluation": "artifacts/evaluations/experiments/v2/weak-640-seed42/evaluation.json",
+      "evaluation_sha256": "1282ccc13e76b4a679fb3a1c1c5cf33268599a339c5a62be89aa62666ea70b37",
+      "model_sha256": "b1093d46789e53cfee030ed68eb13f8206f62cee0dae4352c55944fae759f94f",
+      "image_size": 640
+    },
+    {
+      "name": "weak-640",
+      "seed": 43,
+      "map50_95": 0.40506880388267014,
+      "weak_map50_95": 0.17734514404200385,
+      "cpu_p95_ms": null,
+      "model_bytes": 5397509,
+      "evaluation": "artifacts/evaluations/experiments/v2/weak-640-seed43/evaluation.json",
+      "evaluation_sha256": "6246abc37aebe8a4f93a84258b8355808439aed42b90bf43a301ea21637a8291",
+      "model_sha256": "a6e7b0b0826cbe6f5252afb9b2e021573c5912e4d75f31e4ef47d3cdf567af43",
+      "image_size": 640
+    },
+    {
+      "name": "weak-640",
+      "seed": 44,
+      "map50_95": 0.40702185989027123,
+      "weak_map50_95": 0.18925544952035572,
+      "cpu_p95_ms": null,
+      "model_bytes": 5395845,
+      "evaluation": "artifacts/evaluations/experiments/v2/weak-640-seed44/evaluation.json",
+      "evaluation_sha256": "00a6afbd73b220e8aca9fb8c8bb6e0dcdce3303eca81fb9582fe3057af7132e7",
+      "model_sha256": "130a1eca9b5386e17fcd2636a4c1bc26dea69f0b4516c99d1b744bb1af4f7a05",
+      "image_size": 640
+    },
+    {
+      "name": "weak-no-flip-640",
+      "seed": 42,
+      "map50_95": 0.39643862341201597,
+      "weak_map50_95": 0.20310294565676146,
+      "cpu_p95_ms": null,
+      "model_bytes": 5391877,
+      "evaluation": "artifacts/evaluations/experiments/v2/weak-no-flip-640-seed42/evaluation.json",
+      "evaluation_sha256": "6b3811d04f1a374d507f6b27733e41bacdb22011b72881d2ddcd432095cd1dd4",
+      "model_sha256": "21381c9196a0b6d2cd4a84d97f087bd1b51fa907258c59181fd043b56fd2bfce",
+      "image_size": 640
+    },
+    {
+      "name": "weak-no-flip-640",
+      "seed": 43,
+      "map50_95": 0.3956326192277328,
+      "weak_map50_95": 0.18063597285253652,
+      "cpu_p95_ms": null,
+      "model_bytes": 5397509,
+      "evaluation": "artifacts/evaluations/experiments/v2/weak-no-flip-640-seed43/evaluation.json",
+      "evaluation_sha256": "f335d345b0a6d31be29ed3e9c14afb947c3e6a615097c9dff5b125d5b2f1c9fe",
+      "model_sha256": "11cc91df45b1ce3a2cce4162fc2c50ce3e137fc1ea05769ec7510e9ea48a2268",
+      "image_size": 640
+    },
+    {
+      "name": "weak-no-flip-640",
+      "seed": 44,
+      "map50_95": 0.39196646542901176,
+      "weak_map50_95": 0.16667282539619718,
+      "cpu_p95_ms": null,
+      "model_bytes": 5393413,
+      "evaluation": "artifacts/evaluations/experiments/v2/weak-no-flip-640-seed44/evaluation.json",
+      "evaluation_sha256": "c4cb1a02dcda06a7bb194f62b4d4d4de08111d97433f644de98a9e342c3b5bf3",
+      "model_sha256": "dc0c76605e9fd1b53e2becfc1942e652c6c201e9ba0bcf9d28f4e0fec76dba26",
+      "image_size": 640
+    }
+  ],
+  "configurations": [
+    {
+      "name": "weak-640",
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "runs": 3,
+      "map50_95_mean": 0.4028563325343635,
+      "map50_95_std": 0.004579865903817647,
+      "weak_map50_95_mean": 0.18334047213975188,
+      "weak_map50_95_std": 0.004862693788784417,
+      "cpu_p95_ms_mean": null,
+      "model_bytes_mean": 5395290.333333333
+    },
+    {
+      "name": "weak-no-flip-640",
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "runs": 3,
+      "map50_95_mean": 0.39467923602292015,
+      "map50_95_std": 0.0019462363521510198,
+      "weak_map50_95_mean": 0.18347058130183172,
+      "weak_map50_95_std": 0.015006991022973386,
+      "cpu_p95_ms_mean": null,
+      "model_bytes_mean": 5394266.333333333
+    }
+  ],
+  "promotion": {
+    "promoted": false,
+    "candidate": "weak-640",
+    "overall_delta": -0.018091599550858484,
+    "weak_class_delta": -0.0010440741467601378,
+    "passed_overall_gate": false,
+    "passed_weak_class_gate": false,
+    "thresholds": {
+      "overall_delta_required": 0.01,
+      "weak_delta_required": 0.025,
+      "maximum_overall_drop": 0.005
+    }
+  },
+  "test_metrics_used_for_selection": false
+}

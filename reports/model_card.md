@@ -1,7 +1,8 @@
 # Model Card: neu-det-yolo26n-v1
 
-> Status: formal local evaluation completed on 2026-08-11. Weights are not yet
-> published in a GitHub Release.
+> Status: formal local evaluation completed on 2026-08-11. The public v0.1.1
+> release is source-only; dataset-derived weights are intentionally not
+> distributed because the upstream dataset does not state a standard license.
 
 ## Model
 
@@ -47,6 +48,15 @@ PR curve, and confusion matrix are under `reports/metrics/published` and
 `reports/figures/published`. Raw FP/FN images remain local because NEU-DET does
 not state a standard redistribution license.
 
+## v0.2 ablation decision
+
+The registered validation-only augmentation study did not promote a successor.
+`weak-640` achieved `0.40286 ± 0.00458` validation mAP50-95 over seeds
+42/43/44, a `-0.01809` change from v1. Its mean AP50-95 over `crazing` and
+`rolled-in_scale` changed by `-0.00104`. `weak-no-flip-640` reached
+`0.39468 ± 0.00195`. Neither candidate passed a promotion gate, so this v1
+card remains current and no candidate was evaluated on the test split.
+
 ## Intended use and limitations
 
 The model is intended for research, learning, and portfolio demonstration on
@@ -57,7 +67,7 @@ Known limitations include a small training set, low-resolution grayscale
 imagery, uncertain performance on normal products, and potential sensitivity to
 camera, lighting, material, and preprocessing changes.
 
-## Release contents
+## Local model artifacts
 
 - `best.pt`
 - `model.onnx` (FP32, fixed 640×640 input)
@@ -65,4 +75,6 @@ camera, lighting, material, and preprocessing changes.
 - SHA-256 checksums
 - completed model card and aggregate evaluation report
 
-The source dataset must not be included in the model release.
+The source dataset and dataset-derived model files are not included in the
+source-only public release. The listed artifacts remain the expected contents
+if upstream permission later makes a model release appropriate.

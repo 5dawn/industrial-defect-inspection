@@ -51,3 +51,23 @@ def test_error_analysis_writes_machine_readable_manifest(tmp_path: Path) -> None
     assert {row["error_type"] for row in rows} == {"false_positive", "false_negative"}
     assert (tmp_path / "errors" / "false_positives" / "sample.jpg").is_file()
     assert (tmp_path / "errors" / "false_negatives" / "sample.jpg").is_file()
+
+
+def test_error_analysis_manifest_includes_true_positives(tmp_path: Path) -> None:
+    image_path = tmp_path / "matched.png"
+    Image.new("RGB", (40, 40), "gray").save(image_path)
+    record = ImageRecord(
+        image_path,
+        (GroundTruth(0, (0.0, 0.0, 10.0, 10.0)),),
+        (Prediction(0, 0.9, (0.0, 0.0, 10.0, 10.0)),),
+    )
+
+    report = write_error_analysis(
+        [record], tmp_path / "matched-errors", 0.25, 0.5, {0: "defect"}, sample_limit=1
+    )
+    with Path(report["manifest"]).open(encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+
+    assert rows[0]["error_type"] == "true_positive"
+    assert float(rows[0]["confidence"]) == pytest.approx(0.9)
+    assert float(rows[0]["best_iou"]) == pytest.approx(1.0)

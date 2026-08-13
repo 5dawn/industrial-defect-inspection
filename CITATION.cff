@@ -2,8 +2,8 @@ cff-version: 1.2.0
 message: "If you use this project, please cite the repository and the dataset papers listed in the dataset card."
 title: "Industrial Defect Inspection"
 type: software
-version: 0.1.0
-date-released: 2026-08-10
+version: 0.1.1
+date-released: 2026-08-13
 license: AGPL-3.0-only
 repository-code: "https://github.com/5dawn/industrial-defect-inspection"
 authors:

@@ -161,6 +161,19 @@ def write_error_analysis(
         eligible_predictions = [
             prediction for prediction in record.predictions if prediction.confidence >= confidence
         ]
+        for prediction_index, _, overlap in result.matches:
+            prediction = record.predictions[prediction_index]
+            rows.append(
+                {
+                    "image": record.image_path.name,
+                    "error_type": "true_positive",
+                    "class_id": prediction.class_id,
+                    "class_name": names.get(prediction.class_id, str(prediction.class_id)),
+                    "confidence": prediction.confidence,
+                    "bbox_xyxy": list(prediction.bbox),
+                    "best_iou": overlap,
+                }
+            )
         for index in result.unmatched_predictions:
             prediction = record.predictions[index]
             rows.append(

@@ -15,6 +15,11 @@ PyTorch 和 YOLO26n，在 NEU-DET 六类钢材缺陷数据上提供可复现的�
 最佳 checkpoint 来自第 78 epoch。置信度 0.43 只在验证集上选择，随后冻结测试集只评估
 一次。2 epochs 冒烟结果仍不视为正式成绩。
 
+v0.2 固定消融已完成，但未产生 v2。最佳候选 `weak-640` 在 seeds 42/43/44 上的
+验证集 mAP50-95 为 `0.40286 ± 0.00458`，低于 v1 的 `0.42095`，两个弱类也没有改善。
+因此本项目保留 v1，未对候选运行测试集评估、ONNX 导出或新速度基准。详见
+[验证集负面消融结果](../reports/metrics/published/experiments/v2/README.md)。
+
 ![工业缺陷检测 Demo](../assets/demo/industrial-defect-demo.gif)
 
 动画使用 AI 生成的 synthetic 钢材图片，不重新分发 NEU-DET 原始像素。检测框、
@@ -30,6 +35,10 @@ PyTorch 和 YOLO26n，在 NEU-DET 六类钢材缺陷数据上提供可复现的�
 batch=1、10 次预热后的端到端 p50/p95 为：PyTorch CPU 43.38/46.82 ms、ONNX CPU
 22.98/26.19 ms、PyTorch GPU 13.26/15.76 ms。完整真实报告见
 [`reports/metrics/published`](../reports/metrics/published/)。权重和数据集仍不提交 Git。
+
+v1 的验证集误差分析实际统计到 84 个定位失败、31 个背景误报和 7 个重复预测；
+真值框面积第三四分位的 Recall 最低（0.586）。详见不含原图和本机路径的
+[聚合分析](../reports/metrics/published/analysis/validation/README.md)。
 
 ## 功能
 
@@ -128,6 +137,23 @@ idi-evaluate --config configs/eval/test.yaml
 
 评估输出总体与逐类 P/R/F1/AP、FP/FN 清单、阈值曲线、日志、环境清单和资源基准。
 
+只使用验证集生成不含原图的误差分析：
+
+```powershell
+idi-analyze-errors `
+  --evaluation artifacts/evaluations/validation/evaluation.json `
+  --errors artifacts/evaluations/validation/error_samples/errors.csv `
+  --dataset data/processed/neu_det/dataset.yaml `
+  --output artifacts/analysis/validation
+```
+
+输出包括逐类 TP/FP/FN、置信度和匹配 IoU 分布、框面积四分位 Recall，以及
+重复预测、错分类、定位失败和背景误报计数。
+
+`configs/train/experiments/v2/` 固化了 v0.2 消融矩阵。三个候选先统一使用 seed 42
+在验证集筛选，只有排名前两位继续运行 seeds 43/44。最终比较工具会拒绝种子不完整的
+报告，并且绝不使用测试集选择训练方案。
+
 ## 单图推理
 
 ```powershell
@@ -168,6 +194,18 @@ ruff format --check .
 ruff check .
 pytest -q
 ```
+
+## Source-only Release
+
+在 NEU-DET 许可文本尚不明确时，Release 只发布聚合指标、环境信息和校验和，
+不发布数据集像素、XML、`.pt` 或 `.onnx` 文件：
+
+```powershell
+idi-package-release --version v0.1.1 --output artifacts/releases/v0.1.1
+```
+
+打包器使用固定 allowlist，并拒绝本机绝对路径和未授权资产。Demo 仍需先在本地训练
+checkpoint。
 
 ## 数据与许可
 

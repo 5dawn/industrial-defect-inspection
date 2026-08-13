@@ -26,6 +26,11 @@ def train(config: TrainConfig) -> Path:
             f"Prepared dataset YAML not found: {config.dataset}. Run idi-prepare first."
         )
     run_dir = config.project / config.name
+    if run_dir.exists() and any(run_dir.iterdir()) and not config.resume:
+        raise FileExistsError(
+            f"Training run directory is not empty: {run_dir}. "
+            "Use a unique run name or an explicit resume checkpoint."
+        )
     run_dir.mkdir(parents=True, exist_ok=True)
     prepare_runtime(run_dir)
     logger = configure_run_logger("industrial_defect_inspection.training", run_dir)

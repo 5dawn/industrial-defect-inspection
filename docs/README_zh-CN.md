@@ -15,6 +15,12 @@ PyTorch 和 YOLO26n，在 NEU-DET 六类钢材缺陷数据上提供可复现的�
 最佳 checkpoint 来自第 78 epoch。置信度 0.43 只在验证集上选择，随后冻结测试集只评估
 一次。2 epochs 冒烟结果仍不视为正式成绩。
 
+![工业缺陷检测 Demo](../assets/demo/industrial-defect-demo.gif)
+
+动画使用 AI 生成的 synthetic 钢材图片，不重新分发 NEU-DET 原始像素。检测框、
+置信度和页面中的 CPU 耗时均来自正式 checkpoint 的实际本地推理；受控性能基准仍以
+下方 100 张测试图的报告为准。
+
 | Split | Precision | Recall | F1 | mAP50 | mAP50-95 |
 |---|---:|---:|---:|---:|---:|
 | validation | 0.777 | 0.677 | 0.723 | 0.733 | 0.421 |
@@ -148,6 +154,8 @@ idi-web --config configs/infer/default.yaml `
 **Run inspection**。页面会显示标注图、缺陷类别、置信度、检测框坐标、预处理/推理/
 后处理耗时、设备和模型版本，并允许下载标注图片及 JSON。输出目录由
 `configs/infer/default.yaml` 中的 `output_dir` 管理。
+仓库提供了许可安全的 [synthetic 样例图](../assets/demo/synthetic_steel_sample.jpg)，
+可用于首次启动验收。
 
 默认置信度为验证集选择的 0.43。模型文件不存在时服务仍会以降级模式启动，页面显示
 期望路径和 `--model` 修复命令；`GET /health` 返回 `degraded`，推理请求返回友好提示。

@@ -13,6 +13,13 @@ and Gradio.
 > Research and portfolio demo. It is not validated for production quality
 > control or safety-critical decisions.
 
+![Industrial defect inspection demo](assets/demo/industrial-defect-demo.gif)
+
+The animation uses an AI-generated synthetic steel image rather than
+redistributing NEU-DET pixels. Its boxes, confidence values, and displayed CPU
+timing come from an actual local inference with the formal checkpoint; the
+controlled benchmark results are reported separately below.
+
 ## Status and results
 
 The formal run completed on 2026-08-11. The checkpoint was selected on the
@@ -222,6 +229,8 @@ Open <http://127.0.0.1:7860/demo/>. API documentation is available at
 threshold, and select **Run inspection**. The page displays the annotated image, defect class,
 confidence, bounding-box coordinates, preprocessing/inference/postprocessing time, device, and
 model version. Annotated images and structured JSON are saved under the configured `output_dir`.
+The repository includes an explicitly synthetic
+[sample image](assets/demo/synthetic_steel_sample.jpg) for a license-safe first run.
 
 The default confidence is the validation-selected `0.43`. If the configured model is missing, the
 server still starts in degraded mode: the page shows the expected path and `--model` guidance,

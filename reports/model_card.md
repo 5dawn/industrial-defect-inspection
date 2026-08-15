@@ -79,7 +79,7 @@ The source dataset and dataset-derived model files are not included in the
 source-only public release. The listed artifacts remain the expected contents
 if upstream permission later makes a model release appropriate.
 
-## PatchCore VisA models (v0.3, pending execution)
+## PatchCore VisA models (v0.3)
 
 The implemented anomaly pipeline fits independent PatchCore memory banks for
 `candle`, `capsules`, and `pcb1` using a pretrained ResNet-18 (`layer2` and
@@ -87,8 +87,14 @@ The implemented anomaly pipeline fits independent PatchCore memory banks for
 FP32 inference. Image and pixel thresholds are calibrated only from normal
 validation scores at the 99% and 99.5% quantiles.
 
-No VisA checkpoint or metric is claimed in this card yet. After real fitting,
-the frozen official test report must include image AUROC, pixel AUROC, Dice,
-IoU, normal-test FPR, CPU p50/p95 latency, FPS, peak RAM, configuration hashes,
-and checkpoint SHA-256. Any model release must attribute VisA under CC BY 4.0
-and exclude source images and masks.
+The three real fits and the frozen official test evaluation completed on
+2026-08-15 with Anomalib 2.3.0 and PyTorch 2.12.1+cu130. Macro image AUROC was
+0.8339, pixel AUROC 0.9884, Dice 0.1849, IoU 0.1050, and normal-test FPR 1.89%.
+Per-category results and exact checkpoint SHA-256 values are published under
+`reports/metrics/published/anomaly`. The high pixel AUROC but low Dice/IoU means
+the heatmap ranking is substantially better than the frozen binary masks; the
+model must not be represented as production-ready segmentation.
+
+Checkpoints remain local pending creation of a separately attributed GitHub
+Release. Any release must attribute VisA under CC BY 4.0 and exclude source
+images and masks.

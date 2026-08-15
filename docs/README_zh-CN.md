@@ -138,8 +138,20 @@ idi-predict-anomaly --config configs/anomaly/infer.yaml `
 ```
 
 冻结评估输出 image/pixel AUROC、Dice、IoU、正常样本误报率、CPU p50/p95、FPS 和峰值
-内存。仓库不包含 VisA 数据或 PatchCore checkpoint，因此在真实流程运行完成前不会填写
-异常定位实验指标。
+内存。2026-08-15 的真实冻结测试结果如下，测试集未参与阈值选择：
+
+| 类别 | Image AUROC | Pixel AUROC | Dice | IoU | 正常图误报率 | CPU p50 / p95 |
+|---|---:|---:|---:|---:|---:|---:|
+| candle | 0.9553 | 0.9887 | 0.0575 | 0.0296 | 1.00% | 472.47 / 482.12 ms |
+| capsules | 0.6667 | 0.9816 | 0.2920 | 0.1709 | 1.67% | 320.79 / 433.29 ms |
+| pcb1 | 0.8798 | 0.9948 | 0.2053 | 0.1144 | 3.00% | 434.31 / 445.29 ms |
+| **宏平均** | **0.8339** | **0.9884** | **0.1849** | **0.1050** | **1.89%** | — |
+
+CPU 数据在 i5-12600KF 上以 batch=1、10 次预热、每类 100 张图片测得。Pixel AUROC
+较高，但固定阈值下的 Dice/IoU 偏低，特别是 `candle`，说明像素阈值和掩码质量仍是明确
+局限。精确数值、版本、协议和 checkpoint 哈希见
+[公开异常定位报告](../reports/metrics/published/anomaly/README.md)。仓库仍不包含 VisA 原图、
+掩码或训练 checkpoint。
 
 三个 checkpoint 与元数据齐全后，可生成不包含数据集像素、带 VisA 署名和 SHA-256 的发布包：
 

@@ -33,7 +33,7 @@ NEU-DET detection benchmark.
 - [x] Calibrate image/pixel thresholds using normal-only validation quantiles.
 - [x] Add image/pixel AUROC, Dice, IoU, normal FPR, latency, and RAM reporting.
 - [x] Add anomaly API routes and a second Gradio mode without changing detection contracts.
-- [ ] Run all three real PatchCore fits and publish frozen-test metrics.
+- [x] Run all three real PatchCore fits and publish frozen-test metrics.
 - [ ] Create a VisA-attributed checkpoint release and anomaly Demo GIF.
 
 Acceptance requires reproducible preparation, three evaluated categories,

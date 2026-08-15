@@ -213,9 +213,23 @@ idi-predict-anomaly --config configs/anomaly/infer.yaml `
 ```
 
 Frozen evaluation reports image AUROC, pixel AUROC, Dice, IoU, normal-test FPR,
-CPU p50/p95 latency, FPS, and peak process RAM. This repository does not contain
-VisA data or trained PatchCore checkpoints, so anomaly metrics remain pending
-until those commands complete on the real dataset.
+CPU p50/p95 latency, FPS, and peak process RAM. The real frozen-test run on
+2026-08-15 produced the following results; thresholds were calibrated only on
+normal validation images and were not changed after viewing the test set.
+
+| Category | Image AUROC | Pixel AUROC | Dice | IoU | Normal FPR | CPU p50 / p95 |
+|---|---:|---:|---:|---:|---:|---:|
+| candle | 0.9553 | 0.9887 | 0.0575 | 0.0296 | 1.00% | 472.47 / 482.12 ms |
+| capsules | 0.6667 | 0.9816 | 0.2920 | 0.1709 | 1.67% | 320.79 / 433.29 ms |
+| pcb1 | 0.8798 | 0.9948 | 0.2053 | 0.1144 | 3.00% | 434.31 / 445.29 ms |
+| **Macro mean** | **0.8339** | **0.9884** | **0.1849** | **0.1050** | **1.89%** | — |
+
+CPU latency is end-to-end batch=1 on an Intel i5-12600KF, with 10 warmups and
+100 images per category. Pixel AUROC is strong, but the low frozen-threshold
+Dice/IoU—especially for `candle`—shows that mask calibration remains a major
+limitation. The dataset-pixel-free [published anomaly report](reports/metrics/published/anomaly/README.md)
+contains exact values, checkpoint hashes, versions, and the evaluation protocol.
+The repository still excludes VisA pixels and trained checkpoints.
 
 After all three checkpoints and metadata files exist, build a dataset-pixel-free
 release bundle with attribution and SHA-256 checksums:

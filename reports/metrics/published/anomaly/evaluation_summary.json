@@ -1,0 +1,68 @@
+{
+  "status": "complete",
+  "evaluated_at": "2026-08-15",
+  "dataset": "VisA",
+  "dataset_license": "CC BY 4.0",
+  "split": "official one-class frozen test",
+  "calibration": "normal-only validation: image q=0.99, pixel q=0.995",
+  "source_commit": "02f4db1b655d2182ad9f0b062e442c4ca37d2305",
+  "environment": {
+    "python": "3.11.15",
+    "pytorch": "2.12.1+cu130",
+    "cuda": "13.0",
+    "anomalib": "2.3.0",
+    "gpu": "NVIDIA GeForce RTX 5060 Ti",
+    "cpu": "Intel Core i5-12600KF"
+  },
+  "per_category": [
+    {
+      "category": "candle",
+      "test_images": 200,
+      "image_auroc": 0.9553,
+      "pixel_auroc": 0.9887089003859032,
+      "pixel_dice": 0.05745436940208182,
+      "pixel_iou": 0.029576844166279526,
+      "normal_test_fpr": 0.01,
+      "cpu_p50_ms": 472.4675500037847,
+      "cpu_p95_ms": 482.1212749971892,
+      "cpu_fps": 2.1147630966840167,
+      "peak_process_rss_mb": 1616.30859375,
+      "checkpoint_sha256": "2f7385279dd4f77922939f0c5bfd2b3505f38062a5bd86559db43034913c7820"
+    },
+    {
+      "category": "capsules",
+      "test_images": 160,
+      "image_auroc": 0.6666666666666666,
+      "pixel_auroc": 0.9816086618196634,
+      "pixel_dice": 0.291980010673912,
+      "pixel_iou": 0.1709464833541643,
+      "normal_test_fpr": 0.016666666666666666,
+      "cpu_p50_ms": 320.7863499992527,
+      "cpu_p95_ms": 433.2892850099597,
+      "cpu_fps": 3.0022051106653356,
+      "peak_process_rss_mb": 1654.83984375,
+      "checkpoint_sha256": "4cbe7897088f2f6005ca1fdde958b3852050e95c9a6e54701f2bee0baab4cda8"
+    },
+    {
+      "category": "pcb1",
+      "test_images": 200,
+      "image_auroc": 0.8798,
+      "pixel_auroc": 0.9947535976746453,
+      "pixel_dice": 0.20527953087570183,
+      "pixel_iou": 0.11437966770160275,
+      "normal_test_fpr": 0.03,
+      "cpu_p50_ms": 434.3143500154838,
+      "cpu_p95_ms": 445.29089998686686,
+      "cpu_fps": 2.2938813737713746,
+      "peak_process_rss_mb": 2062.41015625,
+      "checkpoint_sha256": "7c5380f60d3e5539e39382d40716f69228d5afa5a94e13e9be9ef0c98cb52d74"
+    }
+  ],
+  "macro_average": {
+    "image_auroc": 0.8339222222222222,
+    "pixel_auroc": 0.9883570532934041,
+    "pixel_dice": 0.18490463698389856,
+    "pixel_iou": 0.10496766507401552,
+    "normal_test_fpr": 0.01888888888888889
+  }
+}

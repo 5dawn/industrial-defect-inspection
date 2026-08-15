@@ -34,7 +34,8 @@ NEU-DET detection benchmark.
 - [x] Add image/pixel AUROC, Dice, IoU, normal FPR, latency, and RAM reporting.
 - [x] Add anomaly API routes and a second Gradio mode without changing detection contracts.
 - [x] Run all three real PatchCore fits and publish frozen-test metrics.
-- [ ] Create a VisA-attributed checkpoint release and anomaly Demo GIF.
+- [x] Create a VisA-attributed checkpoint release with checksums.
+- [ ] Create an anomaly-mode Demo GIF.
 
 Acceptance requires reproducible preparation, three evaluated categories,
 saved qualitative successes and failures, and no VisA files in Git history.

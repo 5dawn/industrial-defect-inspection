@@ -229,10 +229,32 @@ CPU latency is end-to-end batch=1 on an Intel i5-12600KF, with 10 warmups and
 Dice/IoU—especially for `candle`—shows that mask calibration remains a major
 limitation. The dataset-pixel-free [published anomaly report](reports/metrics/published/anomaly/README.md)
 contains exact values, checkpoint hashes, versions, and the evaluation protocol.
-The repository still excludes VisA pixels and trained checkpoints.
+Git history excludes VisA pixels and trained checkpoints. The attributed
+[v0.3.0 GitHub Release](https://github.com/5dawn/industrial-defect-inspection/releases/tag/v0.3.0)
+provides the three checkpoints separately with SHA-256 checksums.
 
-After all three checkpoints and metadata files exist, build a dataset-pixel-free
-release bundle with attribution and SHA-256 checksums:
+To run anomaly inference without retraining, clone the repository, install
+`.[anomaly]`, then download and place the release files at the paths already
+used by `configs/anomaly/infer.yaml`:
+
+```powershell
+$url = "https://github.com/5dawn/industrial-defect-inspection/releases/download/v0.3.0/industrial-defect-inspection-v0.3.0-visa-patchcore.zip"
+Invoke-WebRequest $url -OutFile visa-patchcore.zip
+Expand-Archive visa-patchcore.zip -DestinationPath artifacts/downloads/v0.3.0
+foreach ($category in "candle", "capsules", "pcb1") {
+  New-Item -ItemType Directory -Force "artifacts/anomaly/models/$category" | Out-Null
+  Copy-Item "artifacts/downloads/v0.3.0/$category.ckpt" "artifacts/anomaly/models/$category/model.ckpt"
+  Copy-Item "artifacts/downloads/v0.3.0/$category.json" "artifacts/anomaly/models/$category/metadata.json"
+}
+idi-web --anomaly-config configs/anomaly/infer.yaml --device cpu
+```
+
+Open <http://127.0.0.1:7860/demo/> and select **Anomaly localization**. The
+detection tab remains degraded until a local NEU-DET checkpoint is trained;
+this does not prevent use of the released VisA models.
+
+To reproduce the published dataset-pixel-free bundle with attribution and
+SHA-256 checksums from locally trained checkpoints:
 
 ```powershell
 idi-package-anomaly-release --version v0.3.0 `

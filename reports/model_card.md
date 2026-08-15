@@ -95,6 +95,8 @@ Per-category results and exact checkpoint SHA-256 values are published under
 the heatmap ranking is substantially better than the frozen binary masks; the
 model must not be represented as production-ready segmentation.
 
-Checkpoints remain local pending creation of a separately attributed GitHub
-Release. Any release must attribute VisA under CC BY 4.0 and exclude source
-images and masks.
+The three checkpoints are available in the separately attributed
+[v0.3.0 GitHub Release](https://github.com/5dawn/industrial-defect-inspection/releases/tag/v0.3.0).
+Its ZIP SHA-256 is
+`e40c8f3e0ee0a443fb2c4eed01e1eb5421e5108329c8af13fac90b5c6103dd46`;
+the archive excludes source images and masks.

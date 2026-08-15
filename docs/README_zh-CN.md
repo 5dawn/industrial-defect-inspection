@@ -150,10 +150,29 @@ idi-predict-anomaly --config configs/anomaly/infer.yaml `
 CPU 数据在 i5-12600KF 上以 batch=1、10 次预热、每类 100 张图片测得。Pixel AUROC
 较高，但固定阈值下的 Dice/IoU 偏低，特别是 `candle`，说明像素阈值和掩码质量仍是明确
 局限。精确数值、版本、协议和 checkpoint 哈希见
-[公开异常定位报告](../reports/metrics/published/anomaly/README.md)。仓库仍不包含 VisA 原图、
-掩码或训练 checkpoint。
+[公开异常定位报告](../reports/metrics/published/anomaly/README.md)。Git 历史仍不包含 VisA
+原图、掩码或训练 checkpoint；三类模型通过带 CC BY 4.0 署名和 SHA-256 的
+[v0.3.0 Release](https://github.com/5dawn/industrial-defect-inspection/releases/tag/v0.3.0)
+单独发布。
 
-三个 checkpoint 与元数据齐全后，可生成不包含数据集像素、带 VisA 署名和 SHA-256 的发布包：
+其他人无需重新训练即可在 Windows 上部署异常定位 Demo：
+
+```powershell
+$url = "https://github.com/5dawn/industrial-defect-inspection/releases/download/v0.3.0/industrial-defect-inspection-v0.3.0-visa-patchcore.zip"
+Invoke-WebRequest $url -OutFile visa-patchcore.zip
+Expand-Archive visa-patchcore.zip -DestinationPath artifacts/downloads/v0.3.0
+foreach ($category in "candle", "capsules", "pcb1") {
+  New-Item -ItemType Directory -Force "artifacts/anomaly/models/$category" | Out-Null
+  Copy-Item "artifacts/downloads/v0.3.0/$category.ckpt" "artifacts/anomaly/models/$category/model.ckpt"
+  Copy-Item "artifacts/downloads/v0.3.0/$category.json" "artifacts/anomaly/models/$category/metadata.json"
+}
+idi-web --anomaly-config configs/anomaly/infer.yaml --device cpu
+```
+
+访问 <http://127.0.0.1:7860/demo/> 并选择“异常定位”。NEU-DET 检测权重仍需本地训练，
+因此检测标签页可能显示降级状态，但不影响已发布的 VisA 异常定位模型。
+
+若要从本地训练产物复现不包含数据集像素、带 VisA 署名和 SHA-256 的发布包：
 
 ```powershell
 idi-package-anomaly-release --version v0.3.0 `
@@ -256,7 +275,7 @@ ruff check .
 pytest -q
 ```
 
-## Source-only Release
+## NEU-DET Source-only Release
 
 在 NEU-DET 许可文本尚不明确时，Release 只发布聚合指标、环境信息和校验和，
 不发布数据集像素、XML、`.pt` 或 `.onnx` 文件：
@@ -265,8 +284,8 @@ pytest -q
 idi-package-release --version v0.1.1 --output artifacts/releases/v0.1.1
 ```
 
-打包器使用固定 allowlist，并拒绝本机绝对路径和未授权资产。Demo 仍需先在本地训练
-checkpoint。
+打包器使用固定 allowlist，并拒绝本机绝对路径和未授权资产。NEU-DET 检测 Demo 仍需先
+在本地训练 checkpoint；此限制不适用于许可证清晰、已在 v0.3.0 单独发布的 VisA 模型。
 
 ## 数据与许可
 

@@ -1,0 +1,20 @@
+dataset_dir: data/processed/visa
+output_dir: artifacts/anomaly/models
+categories:
+  - candle
+  - capsules
+  - pcb1
+backbone: resnet18
+layers:
+  - layer2
+  - layer3
+image_size: 256
+coreset_sampling_ratio: 0.10
+num_neighbors: 9
+train_batch_size: 8
+eval_batch_size: 8
+workers: 2
+device: auto
+seed: 42
+image_threshold_quantile: 0.99
+pixel_threshold_quantile: 0.995

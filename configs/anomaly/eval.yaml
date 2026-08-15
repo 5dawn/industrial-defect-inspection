@@ -1,0 +1,9 @@
+dataset_dir: data/processed/visa
+inference_config: configs/anomaly/infer.yaml
+output_dir: artifacts/anomaly/evaluations/frozen-test
+categories:
+  - candle
+  - capsules
+  - pcb1
+benchmark_count: 100
+benchmark_warmup: 10

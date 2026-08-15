@@ -32,6 +32,7 @@ reports/figures/generated/
 *.pth
 *.onnx
 *.engine
+*.ckpt
 
 # Notebook outputs
 .ipynb_checkpoints/

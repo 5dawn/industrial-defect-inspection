@@ -94,6 +94,12 @@ def environment_snapshot() -> dict[str, Any]:
         snapshot["ultralytics"] = ultralytics.__version__
     except ImportError:
         snapshot["ultralytics"] = None
+    try:
+        import anomalib
+
+        snapshot["anomalib"] = anomalib.__version__
+    except ImportError:
+        snapshot["anomalib"] = None
     return snapshot
 
 

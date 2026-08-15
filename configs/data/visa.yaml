@@ -1,0 +1,12 @@
+dataset_name: VisA
+raw_root: data/raw/visa
+split_csv: data/raw/visa/split_csv/1cls.csv
+output_dir: data/processed/visa
+report_dir: artifacts/data_reports/visa
+categories:
+  - candle
+  - capsules
+  - pcb1
+validation_ratio: 0.20
+seed: 42
+image_size: 256

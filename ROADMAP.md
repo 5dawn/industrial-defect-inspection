@@ -27,14 +27,14 @@
 Use the CC BY 4.0 VisA dataset without mixing its samples or metrics with the
 NEU-DET detection benchmark.
 
-1. Add a task-specific VisA data configuration and source record.
-2. Start with `candle`, `capsules`, and `pcb1`, preserving the published split.
-3. Implement a compact anomaly-localization backend that returns a normalized
-   heatmap and binary mask through a separate result schema.
-4. Select the mask threshold on validation data only.
-5. Report pixel AUROC, Dice, IoU, and p50/p95 latency by category.
-6. Add a detection/heatmap mode selector to the existing demo while keeping the
-   two evaluation reports independent.
+- [x] Add task-specific VisA data, model, evaluation, and inference configurations.
+- [x] Prepare `candle`, `capsules`, and `pcb1` while preserving official test rows.
+- [x] Implement a separate `AnomalyResult`, PatchCore adapter, heatmap, mask, and overlay.
+- [x] Calibrate image/pixel thresholds using normal-only validation quantiles.
+- [x] Add image/pixel AUROC, Dice, IoU, normal FPR, latency, and RAM reporting.
+- [x] Add anomaly API routes and a second Gradio mode without changing detection contracts.
+- [ ] Run all three real PatchCore fits and publish frozen-test metrics.
+- [ ] Create a VisA-attributed checkpoint release and anomaly Demo GIF.
 
 Acceptance requires reproducible preparation, three evaluated categories,
 saved qualitative successes and failures, and no VisA files in Git history.

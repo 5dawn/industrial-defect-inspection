@@ -4,13 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "industrial-defect-inspection"
-version = "0.1.1"
-description = "Reproducible industrial surface-defect detection with YOLO, ONNX, FastAPI, and Gradio."
+version = "0.3.0"
+description = "Reproducible industrial defect detection and anomaly localization with PyTorch."
 readme = "README.md"
 requires-python = ">=3.11,<3.15"
 license = { text = "AGPL-3.0-only" }
 authors = [{ name = "5dawn", email = "94522153+5dawn@users.noreply.github.com" }]
-keywords = ["computer-vision", "object-detection", "industrial-inspection", "yolo", "onnx"]
+keywords = ["computer-vision", "object-detection", "anomaly-detection", "industrial-inspection", "yolo", "patchcore"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Programming Language :: Python :: 3.11",
@@ -40,16 +40,24 @@ dev = [
   "pytest-cov>=5,<7",
   "ruff>=0.6,<1",
 ]
+anomaly = [
+  "anomalib>=2.3,<3",
+]
 
 [project.scripts]
 idi-prepare = "industrial_defect_inspection.data.prepare:main"
+idi-prepare-visa = "industrial_defect_inspection.data.visa:main"
 idi-train = "industrial_defect_inspection.training.train:main"
+idi-fit-anomaly = "industrial_defect_inspection.anomaly.fit:main"
+idi-evaluate-anomaly = "industrial_defect_inspection.anomaly.evaluate:main"
+idi-predict-anomaly = "industrial_defect_inspection.anomaly.predict:main"
 idi-evaluate = "industrial_defect_inspection.evaluation.evaluate:main"
 idi-benchmark = "industrial_defect_inspection.evaluation.benchmark:main"
 idi-publish-report = "industrial_defect_inspection.evaluation.publish:main"
 idi-analyze-errors = "industrial_defect_inspection.evaluation.error_analysis:main"
 idi-compare-experiments = "industrial_defect_inspection.evaluation.experiments:main"
 idi-package-release = "industrial_defect_inspection.release.package:main"
+idi-package-anomaly-release = "industrial_defect_inspection.release.anomaly:main"
 idi-export = "industrial_defect_inspection.inference.export:main"
 idi-predict = "industrial_defect_inspection.inference.predict:main"
 idi-web = "industrial_defect_inspection.web.app:main"

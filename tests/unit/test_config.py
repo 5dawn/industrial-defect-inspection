@@ -4,9 +4,13 @@ import pytest
 from pydantic import ValidationError
 
 from industrial_defect_inspection.config import (
+    AnomalyEvaluationConfig,
     EvaluationConfig,
     InferenceConfig,
+    PatchCoreConfig,
+    load_anomaly_inference_config,
     load_evaluation_config,
+    load_visa_data_config,
 )
 from industrial_defect_inspection.evaluation.evaluate import apply_cli_overrides, build_parser
 
@@ -131,3 +135,29 @@ def test_evaluation_cli_overrides_configured_paths() -> None:
     assert updated.output_dir == Path("reports/override")
     assert updated.split == "test"
     assert updated.operating_confidence == 0.25
+
+
+def test_committed_anomaly_configs_are_valid() -> None:
+    root = Path(__file__).resolve().parents[2]
+
+    data_config = load_visa_data_config(root / "configs/data/visa.yaml")
+    inference_config = load_anomaly_inference_config(root / "configs/anomaly/infer.yaml")
+
+    assert data_config.categories == ["candle", "capsules", "pcb1"]
+    assert set(inference_config.checkpoints) == {"candle", "capsules", "pcb1"}
+
+
+def test_anomaly_configs_reject_duplicate_categories() -> None:
+    with pytest.raises(ValidationError, match="non-empty and unique"):
+        PatchCoreConfig(
+            dataset_dir=Path("data/processed/visa"),
+            output_dir=Path("artifacts/anomaly"),
+            categories=["candle", "candle"],
+        )
+    with pytest.raises(ValidationError, match="non-empty and unique"):
+        AnomalyEvaluationConfig(
+            dataset_dir=Path("data/processed/visa"),
+            inference_config=Path("configs/anomaly/infer.yaml"),
+            output_dir=Path("artifacts/eval"),
+            categories=["pcb1", "pcb1"],
+        )

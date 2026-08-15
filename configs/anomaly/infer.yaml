@@ -1,0 +1,12 @@
+checkpoints:
+  candle: artifacts/anomaly/models/candle/model.ckpt
+  capsules: artifacts/anomaly/models/capsules/model.ckpt
+  pcb1: artifacts/anomaly/models/pcb1/model.ckpt
+metadata:
+  candle: artifacts/anomaly/models/candle/metadata.json
+  capsules: artifacts/anomaly/models/capsules/metadata.json
+  pcb1: artifacts/anomaly/models/pcb1/metadata.json
+output_dir: artifacts/anomaly/predictions
+device: cpu
+image_size: 256
+model_version: visa-patchcore-resnet18-v1

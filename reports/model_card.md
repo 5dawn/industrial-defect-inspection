@@ -78,3 +78,17 @@ camera, lighting, material, and preprocessing changes.
 The source dataset and dataset-derived model files are not included in the
 source-only public release. The listed artifacts remain the expected contents
 if upstream permission later makes a model release appropriate.
+
+## PatchCore VisA models (v0.3, pending execution)
+
+The implemented anomaly pipeline fits independent PatchCore memory banks for
+`candle`, `capsules`, and `pcb1` using a pretrained ResNet-18 (`layer2` and
+`layer3`), 0.10 coreset sampling, nine neighbors, 256×256 padded inputs, and
+FP32 inference. Image and pixel thresholds are calibrated only from normal
+validation scores at the 99% and 99.5% quantiles.
+
+No VisA checkpoint or metric is claimed in this card yet. After real fitting,
+the frozen official test report must include image AUROC, pixel AUROC, Dice,
+IoU, normal-test FPR, CPU p50/p95 latency, FPS, peak RAM, configuration hashes,
+and checkpoint SHA-256. Any model release must attribute VisA under CC BY 4.0
+and exclude source images and masks.

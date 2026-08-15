@@ -6,9 +6,9 @@
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL%203.0-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB.svg)](https://www.python.org/)
 
-A reproducible, portfolio-ready pipeline for detecting six steel-surface defect
-types with YOLO26n, exporting to ONNX, and serving predictions through FastAPI
-and Gradio.
+A reproducible, portfolio-ready pipeline for supervised steel-surface defect
+detection with YOLO26n and one-class anomaly localization with PatchCore. Both
+tasks share configuration, upload validation, FastAPI, and a two-mode Gradio demo.
 
 > Research and portfolio demo. It is not validated for production quality
 > control or safety-critical decisions.
@@ -104,6 +104,11 @@ flowchart LR
     G --> H["CLI"]
     G --> I["FastAPI"]
     G --> J["Gradio Demo"]
+    K["VisA + official 1cls split"] --> L["Audit + normal-only validation"]
+    L --> M["PatchCore ResNet-18"]
+    M --> N["Frozen anomaly thresholds"]
+    N --> I
+    N --> J
 ```
 
 ## Features
@@ -116,6 +121,9 @@ flowchart LR
 - PyTorch and ONNX inference through the same public result schema.
 - Single-image and directory CLI inference with annotated images and JSON.
 - FastAPI endpoints plus a queued, local Gradio UI.
+- VisA `candle`, `capsules`, and `pcb1` preparation with an untouched official
+  test split and normal-only threshold calibration.
+- PatchCore heatmaps, masks, overlays, image/pixel metrics, and CPU resource reports.
 - Unit and integration tests that use synthetic data and never download weights.
 
 ## Setup on Windows
@@ -141,6 +149,12 @@ entry point:
 pip install -r requirements.txt
 ```
 
+Install the optional PatchCore/VisA dependencies only when using anomaly localization:
+
+```powershell
+pip install -e ".[anomaly,dev]"
+```
+
 `requirements.txt` delegates to `pyproject.toml`, which remains the dependency
 source of truth. `requirements-lock-cu130.txt` records one verified CUDA 13.0
 environment and is not the general installation command. Check the selected
@@ -162,6 +176,54 @@ idi-prepare --config configs/data/neu_det.yaml
 The command creates `data/processed/neu_det/dataset.yaml`, manifests, YOLO
 labels, a metadata file, and annotation previews. It refuses to replace an
 existing processed dataset unless `--overwrite` is explicitly supplied.
+
+## VisA anomaly localization (v0.3)
+
+Download VisA and the official `split_csv/1cls.csv` from the
+[Amazon Science repository](https://github.com/amazon-science/spot-diff), then
+arrange them as documented in [data/README.md](data/README.md):
+
+```text
+data/raw/visa/
+├── candle/
+├── capsules/
+├── pcb1/
+└── split_csv/1cls.csv
+```
+
+Install the optional dependencies, prepare the three categories, and fit one
+PatchCore memory bank per category:
+
+```powershell
+pip install -e ".[anomaly,dev]"
+idi-prepare-visa --config configs/data/visa.yaml
+idi-fit-anomaly --config configs/anomaly/patchcore_resnet18.yaml
+```
+
+Preparation writes aspect-ratio-preserving 256×256 images and masks. It keeps
+the official test rows frozen and reserves 20% of official normal training
+images for calibration. Image and pixel thresholds are the 99% and 99.5%
+quantiles of normal validation scores; anomalous test masks are never used to
+choose them.
+
+```powershell
+idi-evaluate-anomaly --config configs/anomaly/eval.yaml
+idi-predict-anomaly --config configs/anomaly/infer.yaml `
+  --category candle --source path\to\image.jpg
+```
+
+Frozen evaluation reports image AUROC, pixel AUROC, Dice, IoU, normal-test FPR,
+CPU p50/p95 latency, FPS, and peak process RAM. This repository does not contain
+VisA data or trained PatchCore checkpoints, so anomaly metrics remain pending
+until those commands complete on the real dataset.
+
+After all three checkpoints and metadata files exist, build a dataset-pixel-free
+release bundle with attribution and SHA-256 checksums:
+
+```powershell
+idi-package-anomaly-release --version v0.3.0 `
+  --config configs/anomaly/infer.yaml --output artifacts/releases/v0.3.0
+```
 
 ## MVP workflow: train, validate, and predict
 
@@ -269,7 +331,7 @@ idi-web --config configs/infer/default.yaml `
 
 Open <http://127.0.0.1:7860/demo/>. API documentation is available at
 <http://127.0.0.1:7860/docs>. Upload one JPEG, PNG, or WebP image, adjust the confidence
-threshold, and select **Run inspection**. The page displays the annotated image, defect class,
+threshold, and select **Run detection**. The page displays the annotated image, defect class,
 confidence, bounding-box coordinates, preprocessing/inference/postprocessing time, device, and
 model version. Annotated images and structured JSON are saved under the configured `output_dir`.
 The repository includes an explicitly synthetic
@@ -279,11 +341,19 @@ The default confidence is the validation-selected `0.43`. If the configured mode
 server still starts in degraded mode: the page shows the expected path and `--model` guidance,
 `GET /health` reports `degraded`, and prediction requests return a clear unavailable response.
 
+When `configs/anomaly/infer.yaml` is present, the page also includes an
+**Anomaly localization** tab with a category selector, heatmap, binary mask,
+overlay, anomaly score, frozen threshold, anomalous area, and timing. Missing
+category checkpoints produce a repair command without preventing the service
+from starting. Pass `--no-anomaly` for a detection-only launch.
+
 | Endpoint | Purpose |
 |---|---|
 | `GET /health` | Service, device, and model load state |
 | `GET /metadata` | Classes, threshold, model version, and disclaimer |
 | `POST /predict` | JPEG/PNG/WebP multipart upload; returns structured detections |
+| `GET /metadata/anomaly` | Supported/available VisA categories and model metadata |
+| `POST /predict/anomaly?category=candle` | Multipart upload; returns `AnomalyResult` |
 
 Uploads are limited to 10 MB. Images larger than 4096 pixels on either side are
 resized while their original dimensions are retained in the response. Empty, corrupt, disguised,

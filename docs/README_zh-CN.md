@@ -4,7 +4,8 @@
 
 这是一个面向计算机视觉实习与开源作品集的工业表面缺陷检测项目。项目使用
 PyTorch 和 YOLO26n，在 NEU-DET 六类钢材缺陷数据上提供可复现的数据准备、训练、
-验证和单图推理流程，并保留 ONNX、FastAPI 与 Gradio 扩展能力。
+验证和单图推理流程；v0.3 进一步加入基于 PatchCore 的 VisA 单类异常定位，并通过同一个
+FastAPI 与 Gradio 应用展示检测框或异常热力图。
 
 > 本项目用于研究与作品集展示，尚未经过真实产线验证，不能作为生产质检或安全关键
 > 决策系统。
@@ -49,6 +50,7 @@ v1 的验证集误差分析实际统计到 84 个定位失败、31 个背景误�
 - 在验证集或冻结测试集上输出指标、逐类结果、FP/FN 样例和延迟报告。
 - 对单张图片输出标注图和结构化 JSON。
 - 复用统一推理引擎支持 PyTorch、ONNX、FastAPI 和 Gradio。
+- 支持 VisA `candle`、`capsules`、`pcb1` 三类数据审计、PatchCore 训练、冻结评估和热力图推理。
 
 ## 目录结构
 
@@ -104,6 +106,47 @@ idi-prepare --config configs/data/neu_det.yaml
 ```
 
 准备命令默认拒绝覆盖非空输出目录；确认需要重新生成时显式增加 `--overwrite`。
+
+## VisA 异常定位（v0.3）
+
+从 [VisA 官方仓库](https://github.com/amazon-science/spot-diff) 获取数据和
+`split_csv/1cls.csv`，整理为：
+
+```text
+data/raw/visa/
+├── candle/
+├── capsules/
+├── pcb1/
+└── split_csv/1cls.csv
+```
+
+安装可选依赖并运行数据准备与 PatchCore 训练：
+
+```powershell
+pip install -e ".[anomaly,dev]"
+idi-prepare-visa --config configs/data/visa.yaml
+idi-fit-anomaly --config configs/anomaly/patchcore_resnet18.yaml
+```
+
+准备流程保持官方测试集不变，仅从官方正常训练图片中按种子 42 留出 20% 校准集。
+图像阈值和像素阈值分别采用正常验证分数的 99% 与 99.5% 分位数，不使用测试异常样本调参。
+
+```powershell
+idi-evaluate-anomaly --config configs/anomaly/eval.yaml
+idi-predict-anomaly --config configs/anomaly/infer.yaml `
+  --category candle --source path\to\image.jpg
+```
+
+冻结评估输出 image/pixel AUROC、Dice、IoU、正常样本误报率、CPU p50/p95、FPS 和峰值
+内存。仓库不包含 VisA 数据或 PatchCore checkpoint，因此在真实流程运行完成前不会填写
+异常定位实验指标。
+
+三个 checkpoint 与元数据齐全后，可生成不包含数据集像素、带 VisA 署名和 SHA-256 的发布包：
+
+```powershell
+idi-package-anomaly-release --version v0.3.0 `
+  --config configs/anomaly/infer.yaml --output artifacts/releases/v0.3.0
+```
 
 ## 训练
 
@@ -177,7 +220,7 @@ idi-web --config configs/infer/default.yaml `
 ```
 
 打开 <http://127.0.0.1:7860/demo/>，上传一张 JPEG、PNG 或 WebP 图片，调整置信度后点击
-**Run inspection**。页面会显示标注图、缺陷类别、置信度、检测框坐标、预处理/推理/
+**Run detection**。页面会显示标注图、缺陷类别、置信度、检测框坐标、预处理/推理/
 后处理耗时、设备和模型版本，并允许下载标注图片及 JSON。输出目录由
 `configs/infer/default.yaml` 中的 `output_dir` 管理。
 仓库提供了许可安全的 [synthetic 样例图](../assets/demo/synthetic_steel_sample.jpg)，
@@ -186,6 +229,12 @@ idi-web --config configs/infer/default.yaml `
 默认置信度为验证集选择的 0.43。模型文件不存在时服务仍会以降级模式启动，页面显示
 期望路径和 `--model` 修复命令；`GET /health` 返回 `degraded`，推理请求返回友好提示。
 上传限制为 10 MB，损坏文件、伪造图片和不支持的格式会在模型推理前被拒绝。
+
+存在 `configs/anomaly/infer.yaml` 时，同一页面会显示 **Anomaly localization** 页签，
+支持选择 `candle`、`capsules` 或 `pcb1`，并展示热力图、二值掩码、叠加图、异常分数、
+冻结阈值、异常面积与耗时。缺少某类 checkpoint 时页面仍可启动，并给出
+`idi-fit-anomaly` 修复提示；使用 `--no-anomaly` 可只启动检测模式。新增 API 为
+`GET /metadata/anomaly` 和 `POST /predict/anomaly?category=candle`。
 
 ## 检查
 

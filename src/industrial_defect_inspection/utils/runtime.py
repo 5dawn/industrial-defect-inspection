@@ -13,10 +13,13 @@ def prepare_runtime(output_dir: Path) -> Path:
     runtime_dir = Path(os.environ.get("IDI_RUNTIME_DIR", "artifacts/runtime")).resolve()
     ultralytics_dir = runtime_dir / "ultralytics"
     matplotlib_dir = runtime_dir / "matplotlib"
+    huggingface_dir = runtime_dir / "huggingface"
     ultralytics_dir.mkdir(parents=True, exist_ok=True)
     matplotlib_dir.mkdir(parents=True, exist_ok=True)
+    huggingface_dir.mkdir(parents=True, exist_ok=True)
     os.environ.setdefault("YOLO_CONFIG_DIR", str(ultralytics_dir))
     os.environ.setdefault("MPLCONFIGDIR", str(matplotlib_dir))
+    os.environ.setdefault("HF_HOME", str(huggingface_dir))
     os.environ.setdefault("MPLBACKEND", "Agg")
     return runtime_dir
 

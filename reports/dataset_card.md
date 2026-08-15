@@ -66,3 +66,17 @@ distribution. This dataset card is not legal advice.
 - Grayscale data differs from the RGB data used for common pretrained weights.
 - Absence of representative normal images limits false-alarm evaluation.
 - Bounding-box quality must be audited after download; it is not assumed perfect.
+
+## VisA extension (v0.3)
+
+The anomaly-localization extension uses the CC BY 4.0 VisA dataset from the
+official Amazon Science `spot-diff` repository. Only `candle`, `capsules`, and
+`pcb1` are configured for v0.3. `idi-prepare-visa` consumes the official
+`split_csv/1cls.csv`, preserves every official test row, and reserves 20% of
+official normal training images for calibration with seed 42.
+
+Images and masks receive the same aspect-ratio-preserving 256×256 transform.
+The repository stores only configuration and aggregate reports; source images,
+masks, processed derivatives, and per-image hashes remain Git-ignored. Real
+category counts and audit results must come from `visa_dataset_summary.json`
+after preparation and are not prefilled in this card.

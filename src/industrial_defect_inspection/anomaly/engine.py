@@ -27,6 +27,17 @@ from industrial_defect_inspection.config import AnomalyInferenceConfig
 from industrial_defect_inspection.utils.runtime import prepare_runtime, resolve_device
 
 
+def _prediction_engine_settings(accelerator: str) -> dict[str, Any]:
+    """Build inference settings compatible with Anomalib's model callbacks."""
+    return {
+        "accelerator": accelerator,
+        "devices": 1,
+        "logger": False,
+        "enable_progress_bar": False,
+        "enable_checkpointing": True,
+    }
+
+
 class AnomalyEngine:
     """Load one model per VisA category on demand and reuse it across requests."""
 
@@ -91,12 +102,7 @@ class AnomalyEngine:
             _, engine_type, _ = require_anomalib()
             accelerator = "gpu" if isinstance(self.device, int) else "cpu"
             self._models[category] = load_patchcore(self.config.checkpoints[category], self.device)
-            self._engines[category] = engine_type(
-                accelerator=accelerator,
-                devices=1,
-                logger=False,
-                enable_checkpointing=False,
-            )
+            self._engines[category] = engine_type(**_prediction_engine_settings(accelerator))
             self._metadata[category] = metadata
 
     def predict(self, image: Image.Image, category: str) -> tuple[AnomalyResult, AnomalyVisuals]:

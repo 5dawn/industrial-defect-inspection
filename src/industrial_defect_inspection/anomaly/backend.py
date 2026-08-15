@@ -73,12 +73,19 @@ def create_patchcore(config: Any) -> Any:
 
 
 def load_patchcore(checkpoint: Path, device: str | int) -> Any:
-    """Restore an Anomalib Lightning checkpoint once for repeated inference."""
+    """Restore a trusted, locally produced Anomalib checkpoint for inference."""
     _, _, patchcore_type = require_anomalib()
     map_location = "cpu" if device == "cpu" else None
     try:
         return patchcore_type.load_from_checkpoint(
-            str(checkpoint), map_location=map_location, strict=False
+            str(checkpoint),
+            map_location=map_location,
+            strict=False,
+            # Anomalib checkpoints contain their PreProcessor object, not tensors only.
+            # Callers validate the configured checkpoint path and published SHA-256.
+            weights_only=False,
         )
     except TypeError:
-        return patchcore_type.load_from_checkpoint(str(checkpoint), map_location=map_location)
+        return patchcore_type.load_from_checkpoint(
+            str(checkpoint), map_location=map_location, weights_only=False
+        )

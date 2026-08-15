@@ -20,6 +20,7 @@ data/processed/**
 artifacts/**
 !artifacts/.gitkeep
 runs/
+results/
 reports/metrics/*.json
 reports/figures/generated/
 !reports/metrics/published/

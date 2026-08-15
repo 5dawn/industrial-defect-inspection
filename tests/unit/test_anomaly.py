@@ -6,8 +6,10 @@ import numpy as np
 import pytest
 from pydantic import ValidationError
 
+from industrial_defect_inspection.anomaly import backend
+from industrial_defect_inspection.anomaly.engine import _prediction_engine_settings
 from industrial_defect_inspection.anomaly.evaluate import binary_auroc, mask_metrics
-from industrial_defect_inspection.anomaly.fit import calibrate_thresholds
+from industrial_defect_inspection.anomaly.fit import _engine_settings, calibrate_thresholds
 from industrial_defect_inspection.anomaly.schemas import AnomalyResult
 from industrial_defect_inspection.config import AnomalyInferenceConfig
 
@@ -51,6 +53,44 @@ def test_normal_only_threshold_calibration_uses_configured_quantiles() -> None:
 
     assert image_threshold == pytest.approx(0.2)
     assert pixel_threshold == pytest.approx(0.15)
+
+
+def test_anomalib_engine_keeps_checkpointing_enabled(tmp_path: Path) -> None:
+    settings = _engine_settings("gpu", 1, tmp_path)
+
+    assert settings["enable_checkpointing"] is True
+    assert settings["limit_val_batches"] == 0
+    assert settings["enable_progress_bar"] is False
+    assert settings["default_root_dir"] == tmp_path
+
+
+def test_load_patchcore_marks_local_checkpoint_as_trusted(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    captured: dict[str, object] = {}
+
+    class FakePatchcore:
+        @classmethod
+        def load_from_checkpoint(cls, path: str, **kwargs):
+            captured.update({"path": path, **kwargs})
+            return cls()
+
+    monkeypatch.setattr(backend, "require_anomalib", lambda: (object, object, FakePatchcore))
+    checkpoint = tmp_path / "model.ckpt"
+
+    backend.load_patchcore(checkpoint, "cpu")
+
+    assert captured["path"] == str(checkpoint)
+    assert captured["map_location"] == "cpu"
+    assert captured["weights_only"] is False
+
+
+def test_prediction_engine_keeps_checkpointing_enabled() -> None:
+    settings = _prediction_engine_settings("cpu")
+
+    assert settings["accelerator"] == "cpu"
+    assert settings["enable_checkpointing"] is True
+    assert settings["enable_progress_bar"] is False
 
 
 def test_binary_auroc_handles_ties_and_single_class() -> None:

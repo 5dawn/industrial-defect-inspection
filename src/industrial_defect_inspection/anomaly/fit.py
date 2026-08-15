@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import time
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -42,6 +43,20 @@ def calibrate_thresholds(
 
 def _engine_device(device: str | int) -> tuple[str, int]:
     return ("gpu", 1) if isinstance(device, int) else ("cpu", 1)
+
+
+def _engine_settings(accelerator: str, devices: int, output: Path) -> dict[str, Any]:
+    """Build Lightning settings compatible with Anomalib's checkpoint callback."""
+    return {
+        "accelerator": accelerator,
+        "devices": devices,
+        "default_root_dir": output,
+        "logger": False,
+        "max_epochs": 1,
+        "limit_val_batches": 0,
+        "enable_progress_bar": False,
+        "enable_checkpointing": True,
+    }
 
 
 def fit_category(config: PatchCoreConfig, category: str) -> dict[str, Any]:
@@ -100,14 +115,7 @@ def fit_category(config: PatchCoreConfig, category: str) -> dict[str, Any]:
             seed=config.seed,
         )
         model = create_patchcore(config)
-        engine = engine_type(
-            accelerator=accelerator,
-            devices=devices,
-            default_root_dir=output,
-            logger=False,
-            max_epochs=1,
-            enable_checkpointing=False,
-        )
+        engine = engine_type(**_engine_settings(accelerator, devices, output))
         logger.info("Fitting PatchCore for %s on %s", category, resolved_device)
         engine.fit(model=model, datamodule=datamodule)
         engine.trainer.save_checkpoint(str(checkpoint))
